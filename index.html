@@ -17,14 +17,14 @@ button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inhe
 .hdr .hbtn{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 12px;border-radius:3px;font-size:11px}
 .hdr .hbtn.green{background:var(--green);border-color:var(--green)}
 
-.side{position:fixed;top:var(--header);left:0;bottom:0;width:220px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:90;padding:8px 0}
+.side{position:fixed;top:calc(var(--header) + 36px);left:0;bottom:0;width:220px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:90;padding:8px 0}
 .side .sec{padding:10px 14px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:700}
 .side .ni{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--muted);border-left:3px solid transparent;transition:all .1s}
 .side .ni:hover{background:var(--alt);color:var(--text)}.side .ni.act{background:#EBF5FF;color:var(--blue);border-left-color:var(--blue);font-weight:600}
 .side .ni .ic{width:16px;text-align:center;font-size:13px}
 .side .ni .bg{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;min-width:16px;text-align:center}
 
-.main{margin-left:220px;margin-top:var(--header);padding:16px;min-height:calc(100vh - var(--header))}
+.main{margin-left:220px;margin-top:calc(var(--header) + 36px);padding:16px;min-height:calc(100vh - var(--header) - 36px)}
 .page{display:none}.page.act{display:block}
 
 .card{background:#fff;border-radius:6px;border:1px solid var(--border);margin-bottom:12px}
@@ -77,8 +77,8 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 .task-row .tid{font-weight:700;color:var(--navy);width:30px;flex-shrink:0;font-size:11px}
 .task-row .tdesc{flex:1;min-width:0}
 .task-row .tdesc .tname{font-weight:500}.task-row .tdesc .tmeta{font-size:10px;color:var(--muted)}
-.task-row .tperson{font-size:11px;font-weight:600;color:var(--blue);width:120px;flex-shrink:0;text-align:right}
-.task-row .tst{width:80px;flex-shrink:0;text-align:right}
+.task-row .tperson{font-size:11px;font-weight:600;color:var(--blue);width:140px;flex-shrink:0;text-align:right}
+.task-row .tst{width:100px;flex-shrink:0;text-align:right}
 .task-row.overdue{background:#FFF0F0;border-left:3px solid var(--red)}
 .task-row.blocked{background:#FFF0F0;border-left:3px solid #922B21}
 .task-row.complete{opacity:.6}
@@ -103,19 +103,27 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 
 @media(max-width:900px){.side{display:none}.main{margin-left:0}}
 @media print{.side,.hdr{display:none!important}.main{margin:0!important;padding:8px!important}}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
 ::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#c1c1c1;border-radius:4px}
 </style>
 </head>
 <body>
 <header class="hdr">
 <div class="logo"><span>abh</span></div><div class="sep">|</div><div class="ttl">St Marys → Erskine Park Relocation Command Centre</div>
-<div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn green" onclick="saveAll()">💾 Save</button><button class="hbtn" onclick="exportJSON()">📥 Export</button><button class="hbtn" onclick="importJSON()">📤 Import</button></div>
+<div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn" onclick="exportJSON()">📥 Export</button><button class="hbtn" onclick="importJSON()">📤 Import</button></div>
+</header>
+<!-- SAVE BAR — fixed below header -->
+<div id="saveBar" style="position:fixed;top:var(--header);left:0;right:0;height:36px;background:#E8F5E9;border-bottom:1px solid #C8E6C9;display:flex;align-items:center;justify-content:center;gap:12px;z-index:99;transition:background .3s;">
+<span id="saveMsg" style="font-size:12px;color:#2E7D32;font-weight:600;">All changes saved</span>
+<button id="saveBtn" onclick="saveAll()" style="background:#27AE60;color:#fff;border:none;padding:5px 20px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">💾 Saved</button>
+</div>
 </header>
 <nav class="side">
 <div class="sec">Command</div>
 <div class="ni act" data-p="dash"><span class="ic">📊</span>Dashboard</div>
 <div class="ni" data-p="today"><span class="ic">📌</span>Today<span class="bg" id="todayBg">0</span></div>
-<div class="ni" data-p="week"><span class="ic">📅</span>This Week</div>
+<div class="ni" data-p="week"><span class="ic">📅</span>Weekly</div>
+<div class="ni" data-p="monthly"><span class="ic">🗓</span>Monthly</div>
 <div class="ni" data-p="person"><span class="ic">👤</span>My Tasks</div>
 <div class="sec">Planning</div>
 <div class="ni" data-p="schedule"><span class="ic">📋</span>Master Schedule</div>
@@ -131,6 +139,8 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 <div class="ni" data-p="budget"><span class="ic">💰</span>Budget</div>
 <div class="ni" data-p="compliance"><span class="ic">✅</span>Compliance</div>
 <div class="ni" data-p="changelog"><span class="ic">📝</span>Change Log</div>
+<div class="sec">Config</div>
+<div class="ni" data-p="settings"><span class="ic">⚙️</span>Work Streams</div>
 </nav>
 <div class="main" id="mainArea"></div>
 
@@ -171,24 +181,56 @@ const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const sb=supabase.createClient(SB_URL,SB_KEY);
 
 const DL=new Date('2026-06-30'),SD=new Date('2026-04-07');
-const WS=[
+const DEFAULT_WS=[
 {id:'stock',n:'Stock Build & Transition',c:'#F39C12'},{id:'spares',n:'Spare Parts & Workshop',c:'#7F8C8D'},
 {id:'utilities',n:'Utilities & Boiler',c:'#E67E22'},{id:'caska',n:'Cask Line A',c:'#2980B9'},
 {id:'caskb',n:'Cask Line B',c:'#8E44AD'},{id:'bottle',n:'Bottle Line',c:'#16A085'},
 {id:'water',n:'Water Treatment / RO',c:'#2C3E50'},{id:'qa',n:'QA / Compliance',c:'#27AE60'},
-{id:'office',n:'Office & IT',c:'#1ABC9C'},{id:'decom',n:'Decommission & Make Good',c:'#C0392B'}
+{id:'office',n:'Office & IT',c:'#1ABC9C'},{id:'decom',n:'Decommission & Make Good',c:'#C0392B'},
+{id:'personnel',n:'Personnel Hire',c:'#6C3483'},{id:'training',n:'Training',c:'#1F618D'}
 ];
+let WS=JSON.parse(localStorage.getItem('abh_ws')||'null')||DEFAULT_WS;
+function saveWS(){localStorage.setItem('abh_ws',JSON.stringify(WS));}
 const ROLES=['Project Manager','Site Supervisor (St Marys)','Site Supervisor (EP)','Licensed Electrician','Licensed Plumber','Mechanical Fitter','Rigger/Crane Operator','Removalist Team Leader','RO/Water Treatment Tech (Veolia)','Scholle/SIG Engineer','HMPS Technician','Bottle Line Technician','QA Manager','IT/Comms Technician','Landlord (St Marys)','Landlord (EP/Goodmans)','Council (Penrith)','Sydney Water','Waste Removal','Cleaning Contractor','Signage Contractor'];
 
 let D={tasks:[],contacts:[],risks:[],budget:[],changes:[],decisions:[],stock:[],compliance:{pre:[],post:[],reg:[],landlord:[],insurance:[]}};
 let editIdx=-1,editConIdx=-1,editDecIdx=-1;
 let dbReady=false;
+let isDirty=false;
+
+function markDirty(){
+  if(isDirty)return;
+  isDirty=true;
+  const bar=document.getElementById('saveBar');
+  const btn=document.getElementById('saveBtn');
+  const msg=document.getElementById('saveMsg');
+  if(bar)bar.style.background='#FFEBEE';
+  if(bar)bar.style.borderBottomColor='#EF9A9A';
+  if(btn){btn.style.background='#C0392B';btn.textContent='💾 SAVE NOW';btn.style.animation='pulse .8s infinite';}
+  if(msg){msg.style.color='#C0392B';msg.textContent='⚠ You have unsaved changes';}
+}
+
+function markClean(){
+  isDirty=false;
+  const bar=document.getElementById('saveBar');
+  const btn=document.getElementById('saveBtn');
+  const msg=document.getElementById('saveMsg');
+  if(bar)bar.style.background='#E8F5E9';
+  if(bar)bar.style.borderBottomColor='#C8E6C9';
+  if(btn){btn.style.background='#27AE60';btn.textContent='💾 Saved';btn.style.animation='none';}
+  if(msg){msg.style.color='#2E7D32';msg.textContent='All changes saved';}
+}
+
+// Warn on page leave if unsaved
+window.addEventListener('beforeunload',function(e){
+  if(isDirty){e.preventDefault();e.returnValue='You have unsaved changes. Are you sure you want to leave?';return e.returnValue;}
+});
 
 // === SUPABASE DATA LAYER ===
 
 // Map DB rows to app format
-function dbToTask(r){return{id:r.id,ws:r.ws,desc:r.description,plannedStart:r.planned_start||'',plannedFinish:r.planned_finish||'',duration:r.duration,actualStart:r.actual_start||'',actualFinish:r.actual_finish||'',status:r.status,role:r.role||'',person:r.person||'',preds:r.predecessors||'',notes:r.notes||'',critical:r.critical||false,recovery:r.recovery||''};}
-function taskToDb(t){return{id:t.id,ws:t.ws,description:t.desc,planned_start:t.plannedStart||null,planned_finish:t.plannedFinish||null,duration:t.duration,actual_start:t.actualStart||null,actual_finish:t.actualFinish||null,status:t.status,role:t.role||'',person:t.person||'',predecessors:t.preds||'',notes:t.notes||'',critical:t.critical||false,recovery:t.recovery||''};}
+function dbToTask(r){return{id:r.id,ws:r.ws,desc:r.description,plannedStart:r.planned_start||'',plannedFinish:r.planned_finish||'',duration:r.duration,actualStart:r.actual_start||'',actualFinish:r.actual_finish||'',status:r.status,role:r.role||'',person:r.person||'',consulted:r.consulted||'',preds:r.predecessors||'',notes:r.notes||'',critical:r.critical||false,recovery:r.recovery||''};}
+function taskToDb(t){return{id:t.id,ws:t.ws,description:t.desc,planned_start:t.plannedStart||null,planned_finish:t.plannedFinish||null,duration:t.duration,actual_start:t.actualStart||null,actual_finish:t.actualFinish||null,status:t.status,role:t.role||'',person:t.person||'',consulted:t.consulted||'',predecessors:t.preds||'',notes:t.notes||'',critical:t.critical||false,recovery:t.recovery||''};}
 function dbToContact(r){return{id:r.id,role:r.role,name:r.name||'',company:r.company||'',mobile:r.mobile||'',email:r.email||'',avail:r.availability||'',rate:r.rate||'',notes:r.notes||''};}
 function contactToDb(c){return{role:c.role,name:c.name||'',company:c.company||'',mobile:c.mobile||'',email:c.email||'',availability:c.avail||'',rate:c.rate||'',notes:c.notes||''};}
 function dbToDec(r){return{id:r.id,title:r.title,owner:r.owner||'',deadline:r.deadline||'',status:r.status,options:r.options||'',impact:r.impact||'',notes:r.notes||'',resolution:r.resolution||'',resolvedDate:r.resolved_date||''};}
@@ -256,12 +298,12 @@ async function dbLog(table,recordId,action,details){await sb.from('activity_log'
 
 // Full save (used by Save button — syncs all in-memory to DB)
 async function saveAll(){
-  if(!dbReady){localStorage.setItem('abh_rc2',JSON.stringify(D));toast('Saved (offline)');return;}
+  if(!dbReady){localStorage.setItem('abh_rc2',JSON.stringify(D));toast('Saved (offline)');markClean();return;}
   try{
-    // Upsert all tasks
     const taskRows=D.tasks.map(taskToDb);
     await sb.from('tasks').upsert(taskRows,{onConflict:'id'});
     toast('Saved to database');
+    markClean();
   }catch(err){
     console.error('Save failed:',err);
     localStorage.setItem('abh_rc2',JSON.stringify(D));
@@ -290,7 +332,7 @@ function stH(s){const m={Complete:'st-c','In Progress':'st-p','Not Started':'st-
 function effSt(t){const td=today();if(t.status==='Complete')return'Complete';if(t.status==='Blocked')return'Blocked';if(t.status==='On Hold')return'On Hold';if(t.plannedFinish<td&&t.status!=='Complete')return'Overdue';return t.status;}
 function wsC(id){return WS.find(w=>w.id===id)?.c||'#ccc';}
 function wsN(id){return WS.find(w=>w.id===id)?.n||id;}
-function getPerson(t){if(t.person)return t.person;if(t.role){const c=D.contacts.find(x=>x.role===t.role&&x.name);return c?c.name:'';}return'';}
+function getPerson(t){return t.person||'';}
 
 // --- nav ---
 document.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>{
@@ -298,11 +340,11 @@ document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));n.classLi
 }));
 function showPage(p){const m=document.getElementById('mainArea');
 switch(p){
-case'dash':renderDash(m);break;case'today':renderToday(m);break;case'week':renderWeek(m);break;
+case'dash':renderDash(m);break;case'today':renderToday(m);break;case'week':renderWeek(m);break;case'monthly':renderMonthly(m);break;
 case'person':renderPerson(m);break;case'schedule':renderSchedule(m);break;case'critical':renderCritical(m);break;
 case'decisions':renderDecisions(m);break;case'team':renderTeam(m);break;case'unalloc':renderUnalloc(m);break;
 case'overdue':renderOverdue(m);break;case'stock':renderStock(m);break;case'risks':renderRisks(m);break;
-case'budget':renderBudget(m);break;case'compliance':renderComp(m);break;case'changelog':renderCL(m);break;
+case'budget':renderBudget(m);break;case'compliance':renderComp(m);break;case'changelog':renderCL(m);break;case'settings':renderSettings(m);break;
 }}
 function openMod(id){document.getElementById(id).classList.add('open');}
 function closeMod(id){document.getElementById(id).classList.remove('open');}
@@ -348,6 +390,21 @@ let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px">Executive
 <div class="kpi ${openRisk===0?'g':'a'}" onclick="showPage('risks')"><div class="kl">High Risks (Open)</div><div class="kv">${openRisk}</div><div class="ks">${D.risks.filter(r=>r.status==='Open').length} total open</div></div>
 </div>`;
 
+// Budget summary on dashboard
+const bEst=D.budget.reduce((s,b)=>s+(+b.est||0),0);
+const bAct=D.budget.reduce((s,b)=>s+(+b.actual||0),0);
+const bPaid=D.budget.filter(b=>b.paid==='Yes').reduce((s,b)=>s+(+b.actual||0),0);
+const bOutstanding=bAct-bPaid;
+const bVar=bAct-bEst;
+h+=`<div class="card" style="cursor:pointer;" onclick="showPage('budget')"><div class="ch"><h3>💰 Budget Summary</h3><span style="margin-left:auto;font-size:10px;color:var(--muted);">Click for full budget →</span></div><div class="cb" style="padding:8px 14px;">
+<div style="display:flex;gap:16px;flex-wrap:wrap;">
+<div style="flex:1;min-width:120px;"><div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Estimated</div><div style="font-size:20px;font-weight:800;color:var(--navy);">$${bEst.toLocaleString()}</div></div>
+<div style="flex:1;min-width:120px;"><div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Actual Spend</div><div style="font-size:20px;font-weight:800;color:${bAct>bEst?'var(--red)':'var(--navy)'};">$${bAct.toLocaleString()}</div></div>
+<div style="flex:1;min-width:120px;"><div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Paid</div><div style="font-size:20px;font-weight:800;color:var(--green);">$${bPaid.toLocaleString()}</div></div>
+<div style="flex:1;min-width:120px;"><div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Outstanding</div><div style="font-size:20px;font-weight:800;color:${bOutstanding>0?'var(--amber)':'var(--green)'};">$${bOutstanding.toLocaleString()}</div></div>
+<div style="flex:1;min-width:120px;"><div style="font-size:10px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;">Variance</div><div style="font-size:20px;font-weight:800;color:${bVar>0?'var(--red)':bVar<0?'var(--green)':'var(--navy)'};">${bVar>=0?'+':''}$${bVar.toLocaleString()}</div></div>
+</div></div></div>`;
+
 // Work stream progress
 h+=`<div class="card"><div class="ch"><h3>Work Stream Progress</h3></div><div class="cb">`;
 WS.forEach(ws=>{const wt=ts.filter(t=>t.ws===ws.id),wd=wt.filter(t=>t.status==='Complete').length,wp=wt.length?Math.round(wd/wt.length*100):0;
@@ -391,26 +448,168 @@ el.innerHTML=h;
 }
 
 // === WEEK VIEW ===
+let selectedWeekStart=null;
 function renderWeek(el){
 const td=new Date();
-const ws=weekStart(td);
+if(!selectedWeekStart)selectedWeekStart=iso(weekStart(td));
+const ws=new Date(selectedWeekStart);
 const days=[];for(let i=0;i<7;i++)days.push(iso(add(ws,i)));
 
-let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">📅 This Week — ${fmt(ws)} to ${fmt(add(ws,6))}</h2>`;
+// Build week options — 17 weeks from project start
+const weekOpts=[];
+for(let w=0;w<18;w++){const wk=add(SD,w*7);weekOpts.push(iso(weekStart(wk)));}
+// Deduplicate
+const uniqueWeeks=[...new Set(weekOpts)];
+
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+<h2 style="font-size:16px;color:var(--navy);">📅 Weekly View</h2>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="btn btn-o" style="font-size:11px;padding:4px 8px;" onclick="shiftWeek(-1)">◀ Prev</button>
+<select id="weekSelect" onchange="selectedWeekStart=this.value;renderWeek(document.getElementById('mainArea'));" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;">
+${uniqueWeeks.map(w=>`<option value="${w}" ${w===selectedWeekStart?'selected':''}>${fmt(w)} — ${fmt(add(new Date(w),6))}</option>`).join('')}
+</select>
+<button class="btn btn-o" style="font-size:11px;padding:4px 8px;" onclick="shiftWeek(1)">Next ▶</button>
+<button class="btn btn-p" style="font-size:11px;padding:4px 8px;" onclick="selectedWeekStart=iso(weekStart(new Date()));renderWeek(document.getElementById('mainArea'));">This Week</button>
+</div></div>
+<p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tasks shown on their start day. Multi-day tasks show duration. Continuing tasks from earlier shown separately.</p>`;
 
 days.forEach(d=>{
-const tasks=D.tasks.filter(t=>t.plannedStart<=d&&t.plannedFinish>=d);
+// Tasks STARTING on this day
+const starting=D.tasks.filter(t=>t.plannedStart===d);
+// Tasks CONTINUING from before (started before this day, still running)
+const continuing=D.tasks.filter(t=>t.plannedStart<d&&t.plannedFinish>=d&&t.status!=='Complete');
 const isToday=d===today();
 const isPast=d<today();
 const we=isWE(d);
-const done=tasks.filter(t=>t.status==='Complete').length;
+const allCount=starting.length+continuing.length;
+const doneCount=starting.filter(t=>t.status==='Complete').length;
 
-h+=`<div class="day-card"><div class="dh ${isToday?'today':isPast?'past':we?'weekend':'future'}">${dayName(d)} ${fmtShort(d)}${isToday?' — TODAY':''}${we?' (Weekend)':''}<span style="margin-left:auto;font-size:10px;">${done}/${tasks.length} done</span></div><div class="db">`;
-if(tasks.length){tasks.sort((a,b)=>(a.status==='Complete'?1:0)-(b.status==='Complete'?1:0)).forEach(t=>{h+=taskRowHtml(t,true);});}
-else h+=`<div style="padding:8px 12px;font-size:11px;color:var(--muted);">${we?'Weekend — available for catch-up if needed':'No tasks scheduled'}</div>`;
+h+=`<div class="day-card"><div class="dh ${isToday?'today':isPast?'past':we?'weekend':'future'}">${dayName(d)} ${fmtShort(d)}${isToday?' — TODAY':''}${we?' (Weekend)':''}<span style="margin-left:auto;font-size:10px;">${starting.length} starting${continuing.length?` · ${continuing.length} continuing`:''}</span></div><div class="db">`;
+
+if(starting.length){
+starting.sort((a,b)=>(a.status==='Complete'?1:0)-(b.status==='Complete'?1:0)).forEach(t=>{h+=taskRowHtml(t,true,true);});
+}
+
+if(continuing.length){
+h+=`<div style="padding:4px 12px;font-size:10px;color:var(--muted);background:#FAFAFA;border-top:1px solid #eee;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">▸ ${continuing.length} continuing from earlier days (click to expand)</div>`;
+h+=`<div style="display:none;">`;
+continuing.forEach(t=>{
+const person=getPerson(t);
+h+=`<div style="padding:3px 12px;font-size:11px;color:var(--muted);border-bottom:1px solid #f5f5f5;display:flex;align-items:center;gap:6px;">
+<span style="font-weight:600;color:var(--navy);width:24px;">${t.id}</span>
+<span style="flex:1;">${t.desc} <span style="font-size:9px;">(day ${diffD(t.plannedStart,d)+1} of ${t.duration})</span></span>
+<span style="font-size:10px;">${person||''}</span>
+${stH(effSt(t))}
+</div>`;
+});
+h+=`</div>`;
+}
+
+if(!starting.length&&!continuing.length){
+h+=`<div style="padding:8px 12px;font-size:11px;color:var(--muted);">${we?'Weekend — available for catch-up if needed':'No tasks scheduled'}</div>`;
+}
+
 h+=`</div></div>`;
 });
 el.innerHTML=h;
+}
+
+function shiftWeek(dir){
+const cur=new Date(selectedWeekStart);
+selectedWeekStart=iso(add(cur,dir*7));
+renderWeek(document.getElementById('mainArea'));
+}
+
+// === MONTHLY CALENDAR VIEW ===
+let selectedMonth=null;
+function renderMonthly(el){
+const td=new Date();
+if(!selectedMonth)selectedMonth=td.getFullYear()+'-'+String(td.getMonth()+1).padStart(2,'0');
+const [yr,mo]=selectedMonth.split('-').map(Number);
+const firstDay=new Date(yr,mo-1,1);
+const lastDay=new Date(yr,mo,0);
+const daysInMonth=lastDay.getDate();
+const startDow=firstDay.getDay(); // 0=Sun
+// Adjust for Monday start: Mon=0, Tue=1 ... Sun=6
+const startOffset=(startDow===0?6:startDow-1);
+
+// Month options
+const monthOpts=[];
+for(let m=0;m<6;m++){const d=new Date(2026,3+m,1);monthOpts.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">🗓 Monthly View</h2>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="btn btn-o" style="font-size:11px;padding:4px 8px;" onclick="shiftMonth(-1)">◀ Prev</button>
+<select id="monthSelect" onchange="selectedMonth=this.value;renderMonthly(document.getElementById('mainArea'));" style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:3px;">
+${monthOpts.map(m=>{const [y,mn]=m.split('-');const d=new Date(y,mn-1,1);return`<option value="${m}" ${m===selectedMonth?'selected':''}>${d.toLocaleString('en-AU',{month:'long',year:'numeric'})}</option>`;}).join('')}
+</select>
+<button class="btn btn-o" style="font-size:11px;padding:4px 8px;" onclick="shiftMonth(1)">Next ▶</button>
+</div></div>
+<p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Tasks shown on their start day. <span style="color:var(--red);font-weight:600;">Red = unallocated.</span> Click a task to edit.</p>`;
+
+// Calendar grid
+h+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#ddd;border:1px solid #ddd;border-radius:6px;overflow:hidden;">`;
+// Day headers
+['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
+h+=`<div style="background:var(--navy);color:#fff;padding:6px;text-align:center;font-size:11px;font-weight:700;">${d}</div>`;
+});
+
+// Empty cells before first day
+for(let i=0;i<startOffset;i++){
+h+=`<div style="background:#f9f9f9;min-height:100px;padding:4px;"></div>`;
+}
+
+// Day cells
+const todayStr=today();
+for(let d=1;d<=daysInMonth;d++){
+const dateStr=yr+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+const isToday=dateStr===todayStr;
+const isWe=isWE(dateStr);
+const tasksStarting=D.tasks.filter(t=>t.plannedStart===dateStr);
+
+h+=`<div style="background:${isToday?'#E3F2FD':isWe?'#FFFDE7':'#fff'};min-height:100px;padding:4px;vertical-align:top;${isToday?'box-shadow:inset 0 0 0 2px var(--blue);':''}">`;
+h+=`<div style="font-size:11px;font-weight:700;color:${isToday?'var(--blue)':'var(--navy)'};margin-bottom:3px;">${d}${isToday?' <span style="font-size:9px;color:var(--blue);">TODAY</span>':''}</div>`;
+
+tasksStarting.forEach(t=>{
+const person=getPerson(t);
+const isUnalloc=!person;
+const s=effSt(t);
+const isDone=s==='Complete';
+h+=`<div onclick="editTask(${D.tasks.indexOf(t)})" style="padding:2px 4px;margin-bottom:2px;border-radius:3px;font-size:9px;line-height:1.3;cursor:pointer;border-left:3px solid ${wsC(t.ws)};background:${isDone?'#D5F5E3':s==='Overdue'?'#FDEDEC':'#f8f9fa'};color:${isUnalloc?'var(--red)':'#333'};font-weight:${isUnalloc?'700':'400'};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="${t.desc}\n${person||'UNALLOCATED'}\n${t.duration}d | ${s}${t.critical?' | ⚡ CRITICAL':''}">`;
+h+=`${t.critical?'⚡':''}${t.desc}`;
+if(person)h+=` <span style="color:var(--muted);font-size:8px;">(${person})</span>`;
+h+=`</div>`;
+});
+
+h+=`</div>`;
+}
+
+// Pad remaining cells to complete the grid
+const totalCells=startOffset+daysInMonth;
+const remainder=totalCells%7;
+if(remainder>0){for(let i=0;i<7-remainder;i++){h+=`<div style="background:#f9f9f9;min-height:100px;padding:4px;"></div>`;}}
+
+h+=`</div>`;
+
+// Legend
+h+=`<div style="display:flex;gap:16px;margin-top:10px;font-size:10px;color:var(--muted);align-items:center;flex-wrap:wrap;">
+<div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;background:#E3F2FD;border:1px solid var(--blue);border-radius:2px;"></div> Today</div>
+<div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;background:#FFFDE7;border:1px solid #ddd;border-radius:2px;"></div> Weekend</div>
+<div style="display:flex;align-items:center;gap:4px;"><span style="color:var(--red);font-weight:700;">Red text</span> = Unallocated</div>
+<div style="display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;background:#D5F5E3;border:1px solid #aaa;border-radius:2px;"></div> Complete</div>
+<div style="display:flex;align-items:center;gap:4px;">⚡ = Critical path</div>
+<div style="display:flex;align-items:center;gap:4px;"><div style="width:3px;height:10px;background:#2980B9;border-radius:1px;"></div> Colour = work stream</div>
+</div>`;
+
+el.innerHTML=h;
+}
+
+function shiftMonth(dir){
+const [yr,mo]=selectedMonth.split('-').map(Number);
+const nd=new Date(yr,mo-1+dir,1);
+selectedMonth=nd.getFullYear()+'-'+String(nd.getMonth()+1).padStart(2,'0');
+renderMonthly(document.getElementById('mainArea'));
 }
 
 // === PERSON VIEW ===
@@ -464,23 +663,62 @@ document.getElementById('personContent').innerHTML=h;
 function taskRowHtml(t,showCheck=false,showDates=false){
 const s=effSt(t);const person=getPerson(t);
 const wsObj=WS.find(w=>w.id===t.ws);
+const idx=D.tasks.indexOf(t);
+const allPeople=[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))];
 let cls='task-row';if(s==='Overdue')cls+=' overdue';if(s==='Blocked')cls+=' blocked';if(s==='Complete')cls+=' complete';
 let h=`<div class="${cls}" style="border-left:3px solid ${wsObj?.c||'#ccc'};">`;
 if(showCheck)h+=`<input type="checkbox" class="tcheck" ${t.status==='Complete'?'checked':''} onchange="toggleTask(${t.id},this.checked)">`;
 h+=`<div class="tid">${t.id}${t.critical?'<span style="color:var(--red);">⚡</span>':''}</div>`;
 h+=`<div class="tdesc"><div class="tname">${t.desc}</div><div class="tmeta">${wsObj?.n||t.ws}${showDates?' | '+fmtShort(t.plannedStart)+' → '+fmtShort(t.plannedFinish):''} | ${t.duration}d${t.preds?' | depends: '+t.preds:''}${t.notes?' | <em>'+t.notes+'</em>':''}</div></div>`;
-h+=`<div class="tperson">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</div>`;
-h+=`<div class="tst">${stH(s)}</div>`;
-h+=`<button class="btn btn-o" style="padding:2px 6px;font-size:10px;flex-shrink:0;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button>`;
+// Inline RESPONSIBLE person selector
+h+=`<div class="tperson" style="width:150px;"><div style="font-size:8px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;margin-bottom:1px;">Responsible</div><select onchange="inlineSetPerson(${idx},this.value)" style="font-size:10px;padding:2px 3px;border:1px solid ${person?'#ccc':'var(--amber)'};border-radius:3px;background:${person?'#fff':'#FEF3CD'};max-width:140px;width:100%;color:var(--text);">`;
+h+=`<option value="">— assign —</option>`;
+allPeople.forEach(p=>{h+=`<option value="${p}" ${person===p?'selected':''}>${p}</option>`;});
+
+h+=`</select>`;
+// Inline CONSULTED person selector
+h+=`<div style="font-size:8px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;margin-top:2px;">Consulted</div><select onchange="inlineSetConsulted(${idx},this.value)" style="font-size:10px;padding:2px 3px;border:1px solid #ddd;border-radius:3px;max-width:140px;width:100%;color:var(--muted);">`;
+h+=`<option value="">— none —</option>`;
+allPeople.forEach(p=>{h+=`<option value="${p}" ${t.consulted===p?'selected':''}>${p}</option>`;});
+
+h+=`</select></div>`;
+// Inline status selector
+h+=`<div class="tst"><select onchange="inlineSetStatus(${idx},this.value)" style="font-size:10px;padding:2px 4px;border-radius:3px;font-weight:600;border:1px solid #ddd;${s==='Complete'?'background:#D5F5E3;color:#1E8449;':s==='In Progress'?'background:#D6EAF8;color:#1A5276;':s==='Blocked'?'background:#FADBD8;color:#922B21;':s==='Overdue'?'background:#F5B7B1;color:#922B21;':s==='On Hold'?'background:#FEF9E7;color:#9A7D0A;':'background:#EAECEE;color:#5D6D7E;'}">`;
+['Not Started','In Progress','Complete','Blocked','On Hold'].forEach(st=>{h+=`<option value="${st}" ${t.status===st?'selected':''}>${st}</option>`;});
+h+=`</select></div>`;
+h+=`<button class="btn btn-o" style="padding:2px 6px;font-size:10px;flex-shrink:0;" onclick="editTask(${idx})">✏</button>`;
 h+=`</div>`;
 return h;
+}
+
+function inlineSetPerson(idx,val){
+const t=D.tasks[idx];if(!t)return;
+t.person=val;
+markDirty();dbSaveTask(t).then(()=>dbLog('tasks',t.id,'assign',val));
+showPage(document.querySelector('.ni.act')?.dataset.p||'dash');updBadges();
+}
+
+function inlineSetConsulted(idx,val){
+const t=D.tasks[idx];if(!t)return;
+t.consulted=val;
+markDirty();dbSaveTask(t).then(()=>dbLog('tasks',t.id,'consulted',val));
+}
+
+function inlineSetStatus(idx,val){
+const t=D.tasks[idx];if(!t)return;
+t.status=val;
+if(val==='Complete'){t.actualFinish=today();if(!t.actualStart)t.actualStart=today();}
+else if(val==='In Progress'){if(!t.actualStart)t.actualStart=today();t.actualFinish='';}
+else if(val==='Not Started'){t.actualStart='';t.actualFinish='';}
+markDirty();dbSaveTask(t).then(()=>dbLog('tasks',t.id,'status',val));
+showPage(document.querySelector('.ni.act')?.dataset.p||'dash');updBadges();
 }
 
 function toggleTask(id,checked){
 const t=D.tasks.find(x=>x.id===id);if(!t)return;
 if(checked){t.status='Complete';t.actualFinish=today();if(!t.actualStart)t.actualStart=today();}
 else{t.status='In Progress';t.actualFinish='';}
-dbSaveTask(t).then(()=>dbLog('tasks',t.id,checked?'complete':'reopen',''));
+markDirty();dbSaveTask(t).then(()=>dbLog('tasks',t.id,checked?'complete':'reopen',''));
 showPage(document.querySelector('.ni.act')?.dataset.p||'dash');updBadges();
 }
 
@@ -495,6 +733,12 @@ let h=`<div style="display:flex;justify-content:space-between;align-items:center
 <select id="sFper" onchange="reSchedule()"><option value="">All People</option>${[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))].map(n=>`<option>${n}</option>`).join('')}</select>
 <input type="text" placeholder="Search..." id="sFq" oninput="reSchedule()" style="width:180px;">
 <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sFcrit" onchange="reSchedule()"> Critical only</label>
+<select id="sFsort" onchange="reSchedule()" style="font-weight:600;">
+<option value="date">Sort: Start Date</option>
+<option value="stream">Sort: Stream</option>
+<option value="responsible">Sort: Responsible</option>
+<option value="status">Sort: Status</option>
+</select>
 </div>
 <div style="overflow:auto;max-height:calc(100vh - 200px);" id="schedDiv"></div>`;
 el.innerHTML=h;reSchedule();
@@ -505,24 +749,37 @@ const fst=document.getElementById('sFst')?.value||'';
 const fper=document.getElementById('sFper')?.value||'';
 const fq=(document.getElementById('sFq')?.value||'').toLowerCase();
 const fcrit=document.getElementById('sFcrit')?.checked||false;
+const sortBy=document.getElementById('sFsort')?.value||'date';
 const td=today();
 
 let tasks=D.tasks.slice();
 if(fws)tasks=tasks.filter(t=>t.ws===fws);
 if(fst==='Overdue')tasks=tasks.filter(t=>effSt(t)==='Overdue');
 else if(fst)tasks=tasks.filter(t=>t.status===fst);
-if(fper)tasks=tasks.filter(t=>getPerson(t)===fper);
+if(fper)tasks=tasks.filter(t=>getPerson(t)===fper||t.consulted===fper);
 if(fq)tasks=tasks.filter(t=>t.desc.toLowerCase().includes(fq)||(t.notes||'').toLowerCase().includes(fq));
 if(fcrit)tasks=tasks.filter(t=>t.critical);
 
-let h=`<table class="dt"><thead><tr><th>ID</th><th>Stream</th><th style="min-width:280px;">Task</th><th>Person</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th>Deps</th><th>Notes</th><th></th></tr></thead><tbody>`;
+// Sort
+const statusOrder={'Blocked':0,'Overdue':1,'In Progress':2,'Not Started':3,'On Hold':4,'Complete':5};
+if(sortBy==='date'){
+tasks.sort((a,b)=>(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999')||(a.id-b.id));
+}else if(sortBy==='stream'){
+tasks.sort((a,b)=>wsN(a.ws).localeCompare(wsN(b.ws))||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999'));
+}else if(sortBy==='responsible'){
+tasks.sort((a,b)=>{const pa=getPerson(a)||'zzz';const pb=getPerson(b)||'zzz';return pa.localeCompare(pb)||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999');});
+}else if(sortBy==='status'){
+tasks.sort((a,b)=>{const sa=statusOrder[effSt(a)]??3;const sb=statusOrder[effSt(b)]??3;return sa-sb||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999');});
+}
+
+let h=`<table class="dt"><thead><tr><th>Stream</th><th style="min-width:280px;">Task</th><th>Responsible</th><th>Consulted</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th>Deps</th><th>Notes</th><th></th></tr></thead><tbody>`;
 tasks.forEach(t=>{
 const s=effSt(t);const person=getPerson(t);
 h+=`<tr style="border-left:3px solid ${wsC(t.ws)};${t.critical?'background:#FFF8F6;':''}${s==='Overdue'?'background:#FFF0F0;':''}">
-<td><strong>${t.id}</strong>${t.critical?' ⚡':''}</td>
 <td style="font-size:10px;">${wsN(t.ws)}</td>
-<td>${t.desc}${t.recovery?'<div class="recovery-box"><div class="rtitle">Recovery Plan:</div>'+t.recovery+'</div>':''}</td>
+<td><span style="font-size:10px;color:var(--muted);margin-right:4px;">#${t.id}${t.critical?' ⚡':''}</span>${t.desc}${t.recovery?'<div class="recovery-box"><div class="rtitle">Recovery Plan:</div>'+t.recovery+'</div>':''}</td>
 <td style="font-size:11px;">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</td>
+<td style="font-size:11px;color:var(--muted);">${t.consulted||'—'}</td>
 <td style="font-size:11px;white-space:nowrap;">${fmtShort(t.plannedStart)}</td>
 <td style="font-size:11px;white-space:nowrap;">${fmtShort(t.plannedFinish)}</td>
 <td>${t.duration}d</td>
@@ -547,7 +804,7 @@ h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="ba
 od.forEach(t=>{
 h+=taskRowHtml(t,false,true);
 h+=`<div style="padding:4px 12px 8px 54px;"><div class="recovery-box"><div class="rtitle">Recovery Plan</div>
-<textarea rows="2" placeholder="What is the plan to get this back on track? Who is accountable? What date will it be resolved?" style="width:100%;" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div></div>`;
+<textarea rows="2" placeholder="What is the plan to get this back on track? Who is accountable? What date will it be resolved?" style="width:100%;" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;markDirty();dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div></div>`;
 });
 h+=`</div></div>`;
 }
@@ -577,22 +834,33 @@ let h=`<div style="display:flex;justify-content:space-between;align-items:center
 if(open.length){
 h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">OPEN — Must Be Resolved</h3></div><div class="cb">`;
 open.forEach(d=>{
+const idx=D.decisions.indexOf(d);
 const overdue=d.deadline<today();
-h+=`<div style="padding:10px 0;border-bottom:1px solid #eee;${overdue?'background:#FFF0F0;margin:0 -14px;padding:10px 14px;':''}">
+h+=`<div style="padding:14px 0;border-bottom:1px solid #eee;${overdue?'background:#FFF0F0;margin:0 -14px;padding:14px 14px;':''}">
 <div style="display:flex;align-items:flex-start;gap:10px;">
 <div style="width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;">${d.id}</div>
 <div style="flex:1;">
-<div style="font-weight:700;font-size:13px;">${d.title}</div>
-<div style="font-size:11px;color:var(--muted);margin-top:4px;">
-<strong>Owner:</strong> ${d.owner} | <strong>Deadline:</strong> <span style="${overdue?'color:var(--red);font-weight:700;':''}">${fmt(d.deadline)}${overdue?' — OVERDUE':''}</span>
-${d.impact?'| <strong>Impact if delayed:</strong> '+d.impact:''}
-${d.options?'| <strong>Options:</strong> '+d.options:''}
-${d.notes?'<br><strong>Notes:</strong> '+d.notes:''}
+<div style="font-weight:700;font-size:14px;margin-bottom:8px;">${d.title}</div>
+
+<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;">
+<div class="fg"><label>Owner</label><input type="text" value="${(d.owner||'').replace(/"/g,'&quot;')}" onchange="decInline(${idx},'owner',this.value)" style="width:140px;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:3px;"></div>
+<div class="fg"><label>Deadline</label><input type="date" value="${d.deadline||''}" onchange="decInline(${idx},'deadline',this.value)" style="font-size:12px;padding:4px 6px;border:1px solid ${overdue?'var(--red)':'#ddd'};border-radius:3px;${overdue?'background:#FFF0F0;':''}"></div>
+<div class="fg"><label>Options / Scenarios</label><input type="text" value="${(d.options||'').replace(/"/g,'&quot;')}" onchange="decInline(${idx},'options',this.value)" style="width:260px;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:3px;" placeholder="e.g. Move / Sell / Decommission"></div>
 </div>
-<div style="margin-top:6px;display:flex;gap:6px;">
-<button class="btn btn-g" style="font-size:10px;" onclick="resolveDec(${d.id})">✓ Mark Resolved</button>
-<button class="btn btn-o" style="font-size:10px;" onclick="editDec(${D.decisions.indexOf(d)})">Edit</button>
-</div></div></div></div>`;
+
+<div class="fg" style="margin-bottom:8px;"><label>Impact if Delayed</label><input type="text" value="${(d.impact||'').replace(/"/g,'&quot;')}" onchange="decInline(${idx},'impact',this.value)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:3px;" placeholder="What breaks if this isn't decided?"></div>
+
+<div class="fg" style="margin-bottom:8px;"><label>Notes / Discussion</label><textarea onchange="decInline(${idx},'notes',this.value)" rows="2" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:3px;" placeholder="Meeting notes, context, considerations...">${d.notes||''}</textarea></div>
+
+<div style="background:#F0FFF0;border:1px solid var(--green);border-radius:4px;padding:8px 10px;margin-bottom:8px;">
+<div class="fg"><label style="color:var(--green);">✓ Resolution — What was decided? (fill this in, then mark resolved)</label>
+<textarea onchange="decInline(${idx},'resolution',this.value)" rows="2" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--green);border-radius:3px;" placeholder="Record the decision here before marking resolved...">${d.resolution||''}</textarea></div>
+</div>
+
+<div style="display:flex;gap:6px;">
+<button class="btn btn-g" style="font-size:11px;" onclick="resolveDecCheck(${d.id})">✓ Mark Resolved</button>
+</div>
+</div></div></div>`;
 });
 h+=`</div></div>`;
 }else{
@@ -601,29 +869,100 @@ h+=`<div class="card"><div class="cb" style="text-align:center;padding:30px;colo
 
 if(resolved.length){
 h+=`<div class="card"><div class="ch"><h3>✅ Resolved (${resolved.length})</h3></div><div class="cb">`;
-resolved.forEach(d=>{h+=`<div style="padding:6px 0;border-bottom:1px solid #eee;opacity:.7;font-size:12px;"><strong>${d.id}.</strong> ${d.title} — resolved ${d.resolvedDate?fmt(d.resolvedDate):''} ${d.resolution?'| '+d.resolution:''}</div>`;});
+resolved.forEach(d=>{
+const idx=D.decisions.indexOf(d);
+h+=`<div style="padding:8px 0;border-bottom:1px solid #eee;">
+<div style="display:flex;align-items:flex-start;gap:8px;">
+<div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;flex-shrink:0;">${d.id}</div>
+<div style="flex:1;">
+<div style="font-weight:600;font-size:12px;">${d.title}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:2px;">Resolved: ${d.resolvedDate?fmt(d.resolvedDate):''} | Owner: ${d.owner}</div>
+<div style="font-size:12px;margin-top:4px;padding:4px 8px;background:#F0FFF0;border-radius:3px;border-left:3px solid var(--green);"><strong>Decision:</strong> ${d.resolution||'<em style="color:var(--muted);">No resolution recorded</em>'}</div>
+<div style="margin-top:4px;"><button class="btn btn-o" style="font-size:10px;padding:2px 8px;" onclick="reopenDec(${d.id})">↩ Reopen</button></div>
+</div></div></div>`;
+});
 h+=`</div></div>`;
 }
 el.innerHTML=h;
 }
-function resolveDec(id){const d=D.decisions.find(x=>x.id===id);if(d){d.status='Resolved';d.resolvedDate=today();dbSaveDec(d).then(()=>dbLog('decisions',d.id,'resolve',''));showPage('decisions');updBadges();}}
+
+function decInline(idx,field,val){
+D.decisions[idx][field]=val;
+markDirty();dbSaveDec(D.decisions[idx]);
+}
+
+function resolveDecCheck(id){
+const d=D.decisions.find(x=>x.id===id);
+if(!d)return;
+if(!d.resolution||d.resolution.trim().length<3){
+alert('Please record the resolution (what was decided) before marking as resolved.');
+return;
+}
+d.status='Resolved';d.resolvedDate=today();
+markDirty();dbSaveDec(d).then(()=>dbLog('decisions',d.id,'resolve',d.resolution));
+showPage('decisions');updBadges();
+}
+
+function reopenDec(id){
+const d=D.decisions.find(x=>x.id===id);
+if(d){d.status='Open';d.resolvedDate='';markDirty();dbSaveDec(d).then(()=>dbLog('decisions',d.id,'reopen',''));showPage('decisions');updBadges();}
+}
 
 // === TEAM & CONTACTS ===
 function renderTeam(el){
+const unnamed=D.contacts.filter(c=>!c.name).length;
 let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
 <h2 style="font-size:16px;color:var(--navy);">Team & Contacts</h2>
-<button class="btn btn-p" onclick="openNewCon()">+ Add Contact</button></div>
-<table class="dt"><thead><tr><th>Role</th><th>Name</th><th>Company</th><th>Mobile</th><th>Email</th><th>Tasks</th><th>Overdue</th><th></th></tr></thead><tbody>`;
+<button class="btn btn-p" onclick="openNewCon()">+ Add Role</button></div>`;
+
+if(unnamed>0){
+h+=`<div class="card" style="border-color:var(--amber);margin-bottom:12px;"><div class="ch" style="background:var(--amber);"><h3 style="color:#fff;">⚠ ${unnamed} roles have no name assigned — type directly into the Name column below</h3></div></div>`;
+}
+
+h+=`<div class="card"><div class="cb" style="overflow-x:auto;padding:8px;">
+<p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Type directly into any field. Drag ≡ to reorder rows. Task counts show even without a name so you can see which roles carry the most work.</p>
+<table class="dt" id="teamTable"><thead><tr><th style="width:20px;"></th><th>Role</th><th style="min-width:140px;">Name</th><th style="min-width:120px;">Company</th><th style="min-width:110px;">Mobile</th><th style="min-width:160px;">Email</th><th style="min-width:45px;">Avail</th><th style="min-width:45px;">Rate</th><th style="min-width:40px;">Tasks</th><th style="min-width:35px;">Late</th><th style="min-width:120px;">Notes</th></tr></thead><tbody id="teamBody">`;
 D.contacts.forEach((c,i)=>{
-const tasks=D.tasks.filter(t=>getPerson(t)===c.name&&c.name);
-const od=tasks.filter(t=>effSt(t)==='Overdue').length;
-h+=`<tr><td><strong>${c.role}</strong></td><td>${c.name||'<span style="color:var(--amber);font-size:10px;">NOT ASSIGNED</span>'}</td>
-<td style="font-size:11px;">${c.company||''}</td><td style="font-size:11px;">${c.mobile||''}</td><td style="font-size:11px;">${c.email||''}</td>
-<td>${c.name?tasks.length:''}</td><td>${od?`<span style="color:var(--red);font-weight:700;">${od}</span>`:c.name?'0':''}</td>
-<td><button class="btn btn-o" style="padding:2px 6px;font-size:10px;" onclick="editCon(${i})">Edit</button></td></tr>`;
+// Count tasks where this person is responsible or consulted
+const personTasks=c.name?D.tasks.filter(t=>t.person===c.name||t.consulted===c.name):[];
+const allTasks=personTasks;
+const od=allTasks.filter(t=>effSt(t)==='Overdue').length;
+const hasName=!!c.name;
+h+=`<tr draggable="true" data-idx="${i}" ondragstart="teamDragStart(event,${i})" ondragover="teamDragOver(event)" ondrop="teamDrop(event,${i})" style="${!hasName?'background:#FEF9E7;':''}cursor:grab;">
+<td style="text-align:center;color:#ccc;font-size:14px;cursor:grab;" title="Drag to reorder">≡</td>
+<td><strong>${c.role}</strong></td>
+<td><input type="text" value="${(c.name||'').replace(/"/g,'&quot;')}" onchange="conInline(${i},'name',this.value)" placeholder="Enter name..." style="width:100%;font-size:12px;padding:4px 6px;border:1px solid ${hasName?'#ddd':'var(--amber)'};border-radius:3px;background:${hasName?'#fff':'#FFFDE7'};font-weight:${hasName?'600':'400'};"></td>
+<td><input type="text" value="${(c.company||'').replace(/"/g,'&quot;')}" onchange="conInline(${i},'company',this.value)" style="width:100%;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="text" value="${(c.mobile||'').replace(/"/g,'&quot;')}" onchange="conInline(${i},'mobile',this.value)" placeholder="04..." style="width:100%;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="email" value="${(c.email||'').replace(/"/g,'&quot;')}" onchange="conInline(${i},'email',this.value)" style="width:100%;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="text" value="${c.avail||''}" onchange="conInline(${i},'avail',this.value)" placeholder="d/wk" style="width:40px;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;text-align:center;"></td>
+<td><input type="text" value="${c.rate||''}" onchange="conInline(${i},'rate',this.value)" placeholder="$/hr" style="width:50px;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;text-align:center;"></td>
+<td style="text-align:center;font-weight:600;${allTasks.length>10?'color:var(--blue);':''}">${allTasks.length}</td>
+<td style="text-align:center;">${od?`<span style="color:var(--red);font-weight:700;">${od}</span>`:'0'}</td>
+<td><input type="text" value="${(c.notes||'').replace(/"/g,'&quot;')}" onchange="conInline(${i},'notes',this.value)" style="width:100%;font-size:10px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;"></td>
+</tr>`;
 });
-h+=`</tbody></table>`;
+h+=`</tbody></table></div></div>`;
 el.innerHTML=h;
+}
+
+let teamDragIdx=-1;
+function teamDragStart(e,idx){teamDragIdx=idx;e.dataTransfer.effectAllowed='move';e.target.style.opacity='0.4';}
+function teamDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function teamDrop(e,dropIdx){
+e.preventDefault();
+if(teamDragIdx<0||teamDragIdx===dropIdx)return;
+const item=D.contacts.splice(teamDragIdx,1)[0];
+D.contacts.splice(dropIdx,0,item);
+// Save all contacts order (re-save all with updated positions)
+D.contacts.forEach((c,i)=>dbSaveContact(c));
+renderTeam(document.getElementById('mainArea'));
+}
+
+function conInline(idx,field,val){
+D.contacts[idx][field]=val;
+markDirty();dbSaveContact(D.contacts[idx]);
+if(field==='name'){updBadges();renderTeam(document.getElementById('mainArea'));}
 }
 
 // === UNALLOCATED ===
@@ -672,7 +1011,7 @@ h+=`<div style="padding:8px 12px;border-bottom:1px solid #fdd;border-left:4px so
 <div style="font-size:11px;color:var(--muted);margin-top:2px;">${wsN(t.ws)} | Due: ${fmt(t.plannedFinish)} | <strong style="color:var(--red);">${daysLate} days late</strong> | Responsible: <strong>${person||'NOBODY — ALLOCATE NOW'}</strong></div></div>
 <button class="btn btn-o" style="font-size:10px;flex-shrink:0;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></div>
 <div class="recovery-box" style="margin-top:6px;"><div class="rtitle">⚡ Recovery Plan (mandatory for overdue tasks)</div>
-<textarea rows="2" placeholder="What will be done to get this back on track? By when? Who is accountable?" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div>
+<textarea rows="2" placeholder="What will be done to get this back on track? By when? Who is accountable?" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;markDirty();dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div>
 </div>`;
 });
 h+=`</div></div>`;
@@ -695,9 +1034,9 @@ let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">📦 Sto
 <div class="card"><div class="ch"><h3>SKU Detail</h3></div><div class="cb">
 <table class="dt"><thead><tr><th>SKU</th><th>Current (pal)</th><th>Weekly Demand</th><th>Buffer Req</th><th>Buffer Wks</th><th>Status</th><th>Last SM Run</th><th>First EP Run</th><th>Notes</th></tr></thead><tbody>`;
 D.stock.forEach((s,i)=>{h+=`<tr><td><strong>${s.sku}</strong></td>
-<td><input type="number" value="${s.current}" onchange="D.stock[${i}].current=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
-<td><input type="number" value="${s.demand}" onchange="D.stock[${i}].demand=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
-<td><input type="number" value="${s.buffer}" onchange="D.stock[${i}].buffer=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td><input type="number" value="${s.current}" onchange="D.stock[${i}].current=this.value;markDirty();dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td><input type="number" value="${s.demand}" onchange="D.stock[${i}].demand=this.value;markDirty();dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td><input type="number" value="${s.buffer}" onchange="D.stock[${i}].buffer=this.value;markDirty();dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
 <td>${s.bufferWks}</td><td>${stH(s.status)}</td><td>${s.lastSM||'TBD'}</td><td>${s.firstEP||'TBD'}</td><td style="font-size:11px;">${s.notes||''}</td></tr>`;});
 h+=`</tbody></table></div></div>`;
 el.innerHTML=h;
@@ -709,17 +1048,35 @@ let h=`<div style="display:flex;justify-content:space-between;align-items:center
 <h2 style="font-size:16px;color:var(--navy);">Risk Register</h2>
 <button class="btn btn-p" onclick="openNewRisk()">+ Add Risk</button></div>
 <div class="card"><div class="cb" style="overflow-x:auto;">
-<table class="dt"><thead><tr><th>ID</th><th>Cat</th><th>Description</th><th>L</th><th>I</th><th>Score</th><th>Mitigation</th><th>Owner</th><th>Status</th></tr></thead><tbody>`;
+<table class="dt"><thead><tr><th>ID</th><th>Cat</th><th style="min-width:220px;">Description</th><th>L</th><th>I</th><th>Score</th><th style="min-width:200px;">Mitigation</th><th>Owner</th><th>Status</th><th></th></tr></thead><tbody>`;
 D.risks.sort((a,b)=>(b.like*b.impact)-(a.like*a.impact)).forEach((r,i)=>{
 const sc=r.like*r.impact;const col=sc>=15?'var(--red)':sc>=8?'var(--amber)':'var(--green)';
-h+=`<tr><td>R${r.id}</td><td>${r.cat}</td><td>${r.desc}</td><td>${r.like}</td><td>${r.impact}</td>
+h+=`<tr>
+<td>R${r.id}</td>
+<td><select onchange="riskInline(${i},'cat',this.value)" style="font-size:11px;padding:1px;border:1px solid #ddd;border-radius:3px;">
+${['Equipment','Infrastructure','Compliance','Workforce','Financial','Schedule','External'].map(c=>`<option ${r.cat===c?'selected':''}>${c}</option>`).join('')}</select></td>
+<td><input type="text" value="${(r.desc||'').replace(/"/g,'&quot;')}" onchange="riskInline(${i},'desc',this.value)" style="width:100%;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><select onchange="riskInline(${i},'like',+this.value)" style="font-size:11px;padding:1px;border:1px solid #ddd;border-radius:3px;width:36px;">
+${[1,2,3,4,5].map(n=>`<option ${r.like===n?'selected':''}>${n}</option>`).join('')}</select></td>
+<td><select onchange="riskInline(${i},'impact',+this.value)" style="font-size:11px;padding:1px;border:1px solid #ddd;border-radius:3px;width:36px;">
+${[1,2,3,4,5].map(n=>`<option ${r.impact===n?'selected':''}>${n}</option>`).join('')}</select></td>
 <td><span style="background:${col};color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;font-size:11px;">${sc}</span></td>
-<td style="font-size:11px;">${r.mit}</td><td>${r.owner}</td>
-<td><select onchange="D.risks[${i}].status=this.value;dbSaveRisk(D.risks[${i}]);" style="font-size:11px;padding:1px;">
-<option ${r.status==='Open'?'selected':''}>Open</option><option ${r.status==='Mitigated'?'selected':''}>Mitigated</option><option ${r.status==='Closed'?'selected':''}>Closed</option></select></td></tr>`;
+<td><input type="text" value="${(r.mit||'').replace(/"/g,'&quot;')}" onchange="riskInline(${i},'mit',this.value)" style="width:100%;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="text" value="${(r.owner||'').replace(/"/g,'&quot;')}" onchange="riskInline(${i},'owner',this.value)" style="width:80px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><select onchange="riskInline(${i},'status',this.value)" style="font-size:11px;padding:1px;border:1px solid #ddd;border-radius:3px;${r.status==='Closed'?'background:#D5F5E3;':r.status==='Mitigated'?'background:#FEF9E7;':''}">
+<option ${r.status==='Open'?'selected':''}>Open</option><option ${r.status==='Mitigated'?'selected':''}>Mitigated</option><option ${r.status==='Closed'?'selected':''}>Closed</option></select></td>
+<td><button class="btn btn-r" style="padding:1px 6px;font-size:10px;" onclick="if(confirm('Delete risk R${r.id}?')){D.risks.splice(${i},1);sb.from('risks').delete().eq('id',${r.id});renderRisks(document.getElementById('mainArea'));}">×</button></td>
+</tr>`;
 });
 h+=`</tbody></table></div></div>`;
 el.innerHTML=h;
+}
+
+function riskInline(idx,field,val){
+D.risks[idx][field]=val;
+markDirty();dbSaveRisk(D.risks[idx]);
+// Re-render if score changed (reorders the table)
+if(field==='like'||field==='impact')renderRisks(document.getElementById('mainArea'));
 }
 
 // === BUDGET ===
@@ -736,13 +1093,30 @@ let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">Budget T
 <div class="kpi ${tv>0?'r':'g'}"><div class="kl">Variance</div><div class="kv">${tv>=0?'+':''}$${tv.toLocaleString()}</div></div>
 </div>
 <div class="card"><div class="ch"><h3>Items</h3><button class="btn btn-p" style="margin-left:auto;font-size:10px;" onclick="openNewBudget()">+ Add</button></div><div class="cb" style="overflow-x:auto;">
-<table class="dt"><thead><tr><th>Category</th><th>Description</th><th>Est</th><th>Quoted</th><th>Actual</th><th>Var</th><th>PO</th><th>Paid</th><th>Notes</th></tr></thead><tbody>`;
+<table class="dt"><thead><tr><th>Category</th><th style="min-width:180px;">Description</th><th>Estimated</th><th>Quoted</th><th>Actual</th><th>Variance</th><th>PO#</th><th>Paid</th><th>Notes</th><th></th></tr></thead><tbody>`;
 D.budget.forEach((b,i)=>{const v=(+b.actual||0)-(+b.est||0);
-h+=`<tr><td>${b.cat}</td><td>${b.desc}</td><td>$${(+b.est||0).toLocaleString()}</td><td>${b.quoted?'$'+Number(b.quoted).toLocaleString():'—'}</td>
-<td>${b.actual?'$'+Number(b.actual).toLocaleString():'—'}</td><td style="color:${v>0?'var(--red)':v<0?'var(--green)':'inherit'};font-weight:600;">${b.actual?(v>=0?'+':'')+v.toLocaleString():'—'}</td>
-<td>${b.po||''}</td><td>${b.paid==='Yes'?'<span style="color:var(--green);">✓</span>':'—'}</td><td style="font-size:10px;">${b.notes||''}</td></tr>`;});
+h+=`<tr>
+<td><input type="text" value="${(b.cat||'').replace(/"/g,'&quot;')}" onchange="budgetInline(${i},'cat',this.value)" style="width:100px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="text" value="${(b.desc||'').replace(/"/g,'&quot;')}" onchange="budgetInline(${i},'desc',this.value)" style="width:100%;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="number" value="${b.est||0}" onchange="budgetInline(${i},'est',this.value)" style="width:80px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><input type="number" value="${b.quoted||''}" onchange="budgetInline(${i},'quoted',this.value)" style="width:80px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;" placeholder="—"></td>
+<td><input type="number" value="${b.actual||''}" onchange="budgetInline(${i},'actual',this.value)" style="width:80px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;" placeholder="—"></td>
+<td style="color:${v>0?'var(--red)':v<0?'var(--green)':'inherit'};font-weight:600;font-size:11px;">${b.actual?(v>=0?'+$':'-$')+Math.abs(v).toLocaleString():'—'}</td>
+<td><input type="text" value="${(b.po||'').replace(/"/g,'&quot;')}" onchange="budgetInline(${i},'po',this.value)" style="width:70px;font-size:11px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><select onchange="budgetInline(${i},'paid',this.value)" style="font-size:11px;padding:1px;border:1px solid #ddd;border-radius:3px;${b.paid==='Yes'?'background:#D5F5E3;':''}">
+<option ${b.paid!=='Yes'?'selected':''}>No</option><option ${b.paid==='Yes'?'selected':''}>Yes</option></select></td>
+<td><input type="text" value="${(b.notes||'').replace(/"/g,'&quot;')}" onchange="budgetInline(${i},'notes',this.value)" style="width:100px;font-size:10px;padding:2px 4px;border:1px solid #ddd;border-radius:3px;"></td>
+<td><button class="btn btn-r" style="padding:1px 6px;font-size:10px;" onclick="if(confirm('Delete?')){sb.from('budget_items').delete().eq('id',${b.id});D.budget.splice(${i},1);renderBudget(document.getElementById('mainArea'));}">×</button></td>
+</tr>`;});
 h+=`</tbody></table></div></div>`;
 el.innerHTML=h;
+}
+
+function budgetInline(idx,field,val){
+D.budget[idx][field]=val;
+markDirty();dbSaveBudget(D.budget[idx]);
+// Re-render if financial field changed (to update KPIs and variance)
+if(['est','quoted','actual','paid'].includes(field))renderBudget(document.getElementById('mainArea'));
 }
 
 // === COMPLIANCE ===
@@ -755,9 +1129,9 @@ const items=D.compliance[compTab]||[];
 const done=items.filter(c=>c.done).length;
 h+=`<div class="card"><div class="ch"><h3>${labels[compTab]}</h3><span style="margin-left:auto;font-size:11px;">${done}/${items.length} complete</span></div><div class="cb">
 <table class="dt"><thead><tr><th style="width:30px;">✓</th><th>Item</th><th style="width:110px;">Date</th><th>Notes</th></tr></thead><tbody>`;
-items.forEach((c,i)=>{h+=`<tr style="${c.done?'background:#D5F5E3;':''}"><td><input type="checkbox" ${c.done?'checked':''} onchange="D.compliance['${compTab}'][${i}].done=this.checked;dbSaveComp(D.compliance['${compTab}'][${i}]);renderComp(document.getElementById('mainArea'));"></td>
-<td>${c.item}</td><td><input type="date" value="${c.date||''}" onchange="D.compliance['${compTab}'][${i}].date=this.value;dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100px;padding:2px;font-size:11px;"></td>
-<td><input type="text" value="${c.notes||''}" onchange="D.compliance['${compTab}'][${i}].notes=this.value;dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100%;padding:2px;font-size:11px;border:1px solid #ddd;border-radius:3px;"></td></tr>`;});
+items.forEach((c,i)=>{h+=`<tr style="${c.done?'background:#D5F5E3;':''}"><td><input type="checkbox" ${c.done?'checked':''} onchange="D.compliance['${compTab}'][${i}].done=this.checked;markDirty();dbSaveComp(D.compliance['${compTab}'][${i}]);renderComp(document.getElementById('mainArea'));"></td>
+<td>${c.item}</td><td><input type="date" value="${c.date||''}" onchange="D.compliance['${compTab}'][${i}].date=this.value;markDirty();dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100px;padding:2px;font-size:11px;"></td>
+<td><input type="text" value="${c.notes||''}" onchange="D.compliance['${compTab}'][${i}].notes=this.value;markDirty();dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100%;padding:2px;font-size:11px;border:1px solid #ddd;border-radius:3px;"></td></tr>`;});
 h+=`</tbody></table></div></div>`;
 el.innerHTML=h;
 }
@@ -781,20 +1155,33 @@ document.getElementById('tmBody').innerHTML=taskFormHtml(t);openMod('taskMod');}
 function taskFormHtml(t){
 return`<div class="fr"><div class="fg" style="flex:2"><label>Description</label><input id="tf_d" value="${t.desc||''}"></div>
 <div class="fg" style="flex:1"><label>Work Stream</label><select id="tf_w">${WS.map(w=>`<option value="${w.id}" ${t.ws===w.id?'selected':''}>${w.n}</option>`).join('')}</select></div></div>
-<div class="fr"><div class="fg"><label>Planned Start</label><input type="date" id="tf_ps" value="${t.plannedStart||''}"></div>
-<div class="fg"><label>Planned Finish</label><input type="date" id="tf_pf" value="${t.plannedFinish||''}"></div>
-<div class="fg"><label>Duration (days)</label><input type="number" id="tf_du" value="${t.duration||1}" min="1"></div>
+<div class="fr"><div class="fg"><label>Planned Start</label><input type="date" id="tf_ps" value="${t.plannedStart||''}" onchange="calcFinish()"></div>
+<div class="fg"><label>Duration (days)</label><input type="number" id="tf_du" value="${t.duration||1}" min="1" onchange="calcFinish()"></div>
+<div class="fg"><label>Planned Finish (auto)</label><input type="date" id="tf_pf" value="${t.plannedFinish||''}" readonly style="background:#f5f5f5;color:var(--muted);"></div>
 <div class="fg"><label>Status</label><select id="tf_st"><option ${t.status==='Not Started'?'selected':''}>Not Started</option><option ${t.status==='In Progress'?'selected':''}>In Progress</option><option ${t.status==='Complete'?'selected':''}>Complete</option><option ${t.status==='Blocked'?'selected':''}>Blocked</option><option ${t.status==='On Hold'?'selected':''}>On Hold</option></select></div></div>
 <div class="fr"><div class="fg"><label>Actual Start</label><input type="date" id="tf_as" value="${t.actualStart||''}"></div>
-<div class="fg"><label>Actual Finish</label><input type="date" id="tf_af" value="${t.actualFinish||''}"></div>
-<div class="fg" style="flex:1"><label>Assigned Role</label><select id="tf_ro"><option value="">(none)</option>${ROLES.map(r=>`<option ${t.role===r?'selected':''}>${r}</option>`).join('')}</select></div></div>
-<div class="fr"><div class="fg" style="flex:1"><label>Assigned Person (override)</label><input id="tf_pe" value="${t.person||''}" placeholder="Leave blank to use role lookup"></div>
+<div class="fg"><label>Actual Finish</label><input type="date" id="tf_af" value="${t.actualFinish||''}"></div></div>
+<input type="hidden" id="tf_ro" value="">
+<div class="fr"><div class="fg" style="flex:1"><label>Responsible (person)</label><select id="tf_pe"><option value="">— select —</option>${(() => {const ap=[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))];return ap.map(p=>`<option value="${p}" ${t.person===p?'selected':''}>${p}</option>`).join('');})()}</select></div>
+<div class="fg" style="flex:1"><label>Consulted (who else needs to know)</label><select id="tf_co"><option value="">— none —</option>${(() => {const ap=[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))];return ap.map(p=>`<option value="${p}" ${t.consulted===p?'selected':''}>${p}</option>`).join('');})()}</select></div>
 <div class="fg"><label>Predecessors (IDs)</label><input id="tf_pr" value="${t.preds||''}"></div>
 <div class="fg"><label>Critical Path?</label><select id="tf_cr"><option value="0" ${!t.critical?'selected':''}>No</option><option value="1" ${t.critical?'selected':''}>Yes ⚡</option></select></div></div>
 <div class="fr"><div class="fg" style="flex:1"><label>Notes</label><textarea id="tf_no" rows="2">${t.notes||''}</textarea></div></div>
 <div class="fr"><div class="fg" style="flex:1"><label>Recovery Plan (if overdue)</label><textarea id="tf_rc" rows="2">${t.recovery||''}</textarea></div></div>`;
 }
+
+function calcFinish(){
+const ps=document.getElementById('tf_ps').value;
+const du=+document.getElementById('tf_du').value;
+if(ps&&du>0){
+const finish=add(new Date(ps),du-1);
+document.getElementById('tf_pf').value=iso(finish);
+}
+}
+
 function saveTask(){
+// Auto-calc finish before saving
+calcFinish();
 const t={
 id:editIdx>=0?D.tasks[editIdx].id:(D.tasks.length?Math.max(...D.tasks.map(x=>x.id))+1:1),
 ws:document.getElementById('tf_w').value,desc:document.getElementById('tf_d').value,
@@ -802,14 +1189,15 @@ plannedStart:document.getElementById('tf_ps').value,plannedFinish:document.getEl
 duration:+document.getElementById('tf_du').value,status:document.getElementById('tf_st').value,
 actualStart:document.getElementById('tf_as').value,actualFinish:document.getElementById('tf_af').value,
 role:document.getElementById('tf_ro').value,person:document.getElementById('tf_pe').value,
+consulted:document.getElementById('tf_co').value,
 preds:document.getElementById('tf_pr').value,notes:document.getElementById('tf_no').value,
 critical:document.getElementById('tf_cr').value==='1',recovery:document.getElementById('tf_rc').value
 };
 if(editIdx>=0)D.tasks[editIdx]=t;else D.tasks.push(t);
-dbSaveTask(t).then(()=>dbLog('tasks',t.id,editIdx>=0?'update':'create',''));
+markDirty();dbSaveTask(t).then(()=>dbLog('tasks',t.id,editIdx>=0?'update':'create',''));
 closeMod('taskMod');showPage(document.querySelector('.ni.act')?.dataset.p||'schedule');updBadges();
 }
-function deleteTask(){if(!confirm('Delete this task?'))return;const t=D.tasks[editIdx];dbDeleteTask(t.id).then(()=>dbLog('tasks',t.id,'delete',''));D.tasks.splice(editIdx,1);closeMod('taskMod');showPage('schedule');updBadges();}
+function deleteTask(){if(!confirm('Delete this task?'))return;const t=D.tasks[editIdx];markDirty();dbDeleteTask(t.id).then(()=>dbLog('tasks',t.id,'delete',''));D.tasks.splice(editIdx,1);closeMod('taskMod');showPage('schedule');updBadges();}
 
 // === CONTACT MODAL ===
 function openNewCon(){editConIdx=-1;document.getElementById('conBody').innerHTML=conFormHtml({});openMod('conMod');}
@@ -845,18 +1233,18 @@ status:document.getElementById('df_st').value,options:document.getElementById('d
 notes:document.getElementById('df_no').value,resolution:document.getElementById('df_st').value==='Resolved'?document.getElementById('df_no').value:'',
 resolvedDate:document.getElementById('df_st').value==='Resolved'?today():''};
 if(editDecIdx>=0)D.decisions[editDecIdx]=d;else D.decisions.push(d);
-dbSaveDec(d).then(()=>dbLog('decisions',d.id,'update',''));
+markDirty();dbSaveDec(d).then(()=>dbLog('decisions',d.id,'update',''));
 closeMod('decMod');showPage('decisions');updBadges();
 }
 
 // === SIMPLE MODALS FOR RISK/BUDGET/CHANGE ===
 function openNewRisk(){const desc=prompt('Risk description:');if(!desc)return;const cat=prompt('Category (Equipment/Infrastructure/Compliance/Workforce/Financial/Schedule/External):','Schedule');
 const like=+prompt('Likelihood 1-5:','3');const imp=+prompt('Impact 1-5:','3');const mit=prompt('Mitigation:','');const owner=prompt('Owner:','');
-const r={cat:cat||'Schedule',desc,like:like||3,impact:imp||3,mit:mit||'',owner:owner||'',status:'Open'};D.risks.push(r);dbSaveRisk(r);showPage('risks');}
+const r={cat:cat||'Schedule',desc,like:like||3,impact:imp||3,mit:mit||'',owner:owner||'',status:'Open'};D.risks.push(r);markDirty();dbSaveRisk(r);showPage('risks');}
 function openNewBudget(){const desc=prompt('Description:');if(!desc)return;const cat=prompt('Category:','');const est=+prompt('Estimated $:','0');
-const b={cat:cat||'',desc,est,quoted:'',actual:'',po:'',paid:'No',notes:''};D.budget.push(b);dbSaveBudget(b);showPage('budget');}
+const b={cat:cat||'',desc,est,quoted:'',actual:'',po:'',paid:'No',notes:''};D.budget.push(b);markDirty();dbSaveBudget(b);showPage('budget');}
 function openNewChange(){const desc=prompt('Change description:');if(!desc)return;const by=prompt('Raised by:','');const impact=prompt('Impact (Schedule/Cost/Scope):','Schedule');
-const ch={date:today(),desc,by:by||'',impact:impact||'',approved:'Pending',approvedBy:''};D.changes.push(ch);dbSaveChange(ch);showPage('changelog');}
+const ch={date:today(),desc,by:by||'',impact:impact||'',approved:'Pending',approvedBy:''};D.changes.push(ch);markDirty();dbSaveChange(ch);showPage('changelog');}
 
 // === SEED ===
 function seed(){
@@ -864,7 +1252,7 @@ let id=0;
 function T(ws,desc,ps,dur,preds,role,status,notes,crit){id++;
 const s=new Date(ps),f=add(s,dur-1);
 D.tasks.push({id,ws,desc,plannedStart:iso(s),plannedFinish:iso(f),duration:dur,actualStart:status==='Complete'?iso(s):(status==='In Progress'?iso(s):''),
-actualFinish:status==='Complete'?iso(f):'',status:status||'Not Started',role:role||'',person:'',preds:preds||'',notes:notes||'',critical:!!crit,recovery:''});}
+actualFinish:status==='Complete'?iso(f):'',status:status||'Not Started',role:role||'',person:'',consulted:'',preds:preds||'',notes:notes||'',critical:!!crit,recovery:''});}
 
 // STOCK BUILD
 T('stock','DECISION: Agree stock build targets per SKU — operations sign-off','2026-04-07',3,'','Project Manager','Not Started','Gate: defines when each line can go offline',1);
@@ -1159,6 +1547,69 @@ async function seedDb(){
   }
 }
 
+// === WORK STREAM SETTINGS ===
+function renderSettings(el){
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">⚙ Work Streams</h2>
+<p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Add, rename, recolour, or remove work streams. Changes apply immediately to all views. Drag ≡ to reorder.</p>
+<div class="card"><div class="cb" style="padding:8px;">
+<table class="dt" id="wsTable"><thead><tr><th style="width:20px;"></th><th style="width:100px;">ID</th><th style="min-width:200px;">Name</th><th style="width:60px;">Colour</th><th style="width:50px;">Tasks</th><th style="width:40px;"></th></tr></thead><tbody>`;
+WS.forEach((ws,i)=>{
+const taskCount=D.tasks.filter(t=>t.ws===ws.id).length;
+h+=`<tr draggable="true" ondragstart="wsDragStart(event,${i})" ondragover="wsDragOver(event)" ondrop="wsDrop(event,${i})" style="cursor:grab;">
+<td style="text-align:center;color:#ccc;font-size:14px;cursor:grab;">≡</td>
+<td><input type="text" value="${ws.id}" onchange="wsInline(${i},'id',this.value)" style="width:90px;font-size:11px;padding:3px 5px;border:1px solid #ddd;border-radius:3px;font-family:monospace;"></td>
+<td><input type="text" value="${ws.n}" onchange="wsInline(${i},'n',this.value)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #ddd;border-radius:3px;font-weight:600;"></td>
+<td><input type="color" value="${ws.c}" onchange="wsInline(${i},'c',this.value)" style="width:40px;height:28px;border:none;cursor:pointer;"></td>
+<td style="text-align:center;font-weight:600;">${taskCount}</td>
+<td>${taskCount===0?`<button class="btn btn-r" style="padding:1px 6px;font-size:10px;" onclick="removeWS(${i})">×</button>`:'<span style="font-size:9px;color:var(--muted);">in use</span>'}</td>
+</tr>`;
+});
+h+=`</tbody></table>
+<div style="margin-top:10px;display:flex;gap:8px;">
+<button class="btn btn-p" onclick="addWS()">+ Add Work Stream</button>
+</div>
+</div></div>`;
+el.innerHTML=h;
+}
+
+function wsInline(idx,field,val){
+// If changing ID, update all tasks that use the old ID
+if(field==='id'){
+const oldId=WS[idx].id;
+D.tasks.forEach(t=>{if(t.ws===oldId)t.ws=val;});
+}
+WS[idx][field]=val;
+saveWS();
+}
+
+function addWS(){
+const name=prompt('Work stream name:');
+if(!name)return;
+const id=name.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,12);
+if(WS.find(w=>w.id===id)){alert('A work stream with a similar ID already exists.');return;}
+WS.push({id,n:name,c:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')});
+saveWS();renderSettings(document.getElementById('mainArea'));
+}
+
+function removeWS(idx){
+const ws=WS[idx];
+const taskCount=D.tasks.filter(t=>t.ws===ws.id).length;
+if(taskCount>0){alert('Cannot remove — '+taskCount+' tasks are assigned to this work stream.');return;}
+if(!confirm('Remove work stream "'+ws.n+'"?'))return;
+WS.splice(idx,1);saveWS();renderSettings(document.getElementById('mainArea'));
+}
+
+let wsDragIdx=-1;
+function wsDragStart(e,idx){wsDragIdx=idx;e.dataTransfer.effectAllowed='move';e.target.style.opacity='0.4';}
+function wsDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';}
+function wsDrop(e,dropIdx){
+e.preventDefault();
+if(wsDragIdx<0||wsDragIdx===dropIdx)return;
+const item=WS.splice(wsDragIdx,1)[0];
+WS.splice(dropIdx,0,item);
+saveWS();renderSettings(document.getElementById('mainArea'));
+}
+
 // === INIT ===
 (async function init(){
   document.getElementById('mainArea').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:60vh;"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:8px;">⏳</div><div style="font-size:14px;color:var(--muted);">Loading from database...</div></div></div>';
@@ -1170,4 +1621,3 @@ async function seedDb(){
 </script>
 </body>
 </html>
-
