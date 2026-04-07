@@ -1,1 +1,1173 @@
-Placeholder
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ABH — Relocation Command Centre</title>
+<style>
+:root{--navy:#1B2A4A;--red:#C0392B;--amber:#E67E22;--green:#27AE60;--blue:#0E7CCE;--bg:#F0F2F5;--card:#fff;--text:#1a1a2e;--muted:#5a6577;--border:#D5DAE3;--alt:#F7F9FC;--sidebar:56px;--header:52px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inherit;font-size:13px}
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--header);background:var(--navy);display:flex;align-items:center;padding:0 16px;z-index:100;gap:12px}
+.hdr .logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:1px}.hdr .logo span{color:var(--blue)}
+.hdr .sep{color:rgba(255,255,255,.3);font-size:14px}.hdr .ttl{color:rgba(255,255,255,.7);font-size:12px}
+.hdr .rt{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hdr .dead{background:var(--red);color:#fff;padding:3px 10px;border-radius:3px;font-weight:700;font-size:11px}
+.hdr .hbtn{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 12px;border-radius:3px;font-size:11px}
+.hdr .hbtn.green{background:var(--green);border-color:var(--green)}
+
+.side{position:fixed;top:var(--header);left:0;bottom:0;width:220px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:90;padding:8px 0}
+.side .sec{padding:10px 14px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:700}
+.side .ni{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--muted);border-left:3px solid transparent;transition:all .1s}
+.side .ni:hover{background:var(--alt);color:var(--text)}.side .ni.act{background:#EBF5FF;color:var(--blue);border-left-color:var(--blue);font-weight:600}
+.side .ni .ic{width:16px;text-align:center;font-size:13px}
+.side .ni .bg{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;min-width:16px;text-align:center}
+
+.main{margin-left:220px;margin-top:var(--header);padding:16px;min-height:calc(100vh - var(--header))}
+.page{display:none}.page.act{display:block}
+
+.card{background:#fff;border-radius:6px;border:1px solid var(--border);margin-bottom:12px}
+.card .ch{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.card .ch h3{font-size:13px;font-weight:700}.card .cb{padding:12px 14px}
+
+.kpi-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border-radius:6px;padding:12px 14px;border-left:4px solid var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:transform .1s}
+.kpi:hover{transform:translateY(-1px)}.kpi.r{border-left-color:var(--red)}.kpi.g{border-left-color:var(--green)}.kpi.a{border-left-color:var(--amber)}.kpi.b{border-left-color:var(--blue)}
+.kpi .kl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.kpi .kv{font-size:24px;font-weight:800;color:var(--navy)}.kpi .ks{font-size:10px;color:var(--muted);margin-top:2px}
+
+table.dt{width:100%;border-collapse:collapse;font-size:12px}
+table.dt th{background:var(--navy);color:#fff;padding:6px 8px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;z-index:2;white-space:nowrap}
+table.dt td{padding:5px 8px;border-bottom:1px solid #EEF0F4;vertical-align:top}
+table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{background:#E8F0FE}
+
+.st{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:600;white-space:nowrap}
+.st-c{background:#D5F5E3;color:#1E8449}.st-p{background:#D6EAF8;color:#1A5276}.st-n{background:#EAECEE;color:#5D6D7E}
+.st-b{background:#FADBD8;color:#922B21}.st-h{background:#FEF9E7;color:#9A7D0A}.st-o{background:#F5B7B1;color:#922B21}
+
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:3px;font-size:11px;font-weight:600;border:none}
+.btn-p{background:var(--blue);color:#fff}.btn-r{background:var(--red);color:#fff}.btn-g{background:var(--green);color:#fff}
+.btn-o{background:transparent;border:1px solid var(--border);color:var(--text)}.btn:hover{opacity:.85}
+
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;justify-content:center;align-items:flex-start;padding-top:40px}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:8px;width:700px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal .mh{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal .mh h3{font-size:15px}.modal .mx{background:none;border:none;font-size:18px;color:var(--muted)}
+.modal .mb{padding:16px 18px}.modal .mf{padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+
+.fr{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.fg{display:flex;flex-direction:column;gap:3px}.fg label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{border:1px solid var(--border);border-radius:3px;padding:5px 8px}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(14,124,206,.12)}
+
+.day-card{border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden}
+.day-card .dh{padding:8px 12px;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px}
+.day-card .dh.today{background:var(--blue);color:#fff}
+.day-card .dh.past{background:#EAECEE;color:var(--muted)}
+.day-card .dh.future{background:var(--alt);color:var(--text)}
+.day-card .dh.weekend{background:#FFF8E1;color:var(--amber)}
+.day-card .db{padding:0}
+
+.task-row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px}
+.task-row:last-child{border-bottom:none}
+.task-row:hover{background:#F5F8FF}
+.task-row .tcheck{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
+.task-row .tid{font-weight:700;color:var(--navy);width:30px;flex-shrink:0;font-size:11px}
+.task-row .tdesc{flex:1;min-width:0}
+.task-row .tdesc .tname{font-weight:500}.task-row .tdesc .tmeta{font-size:10px;color:var(--muted)}
+.task-row .tperson{font-size:11px;font-weight:600;color:var(--blue);width:120px;flex-shrink:0;text-align:right}
+.task-row .tst{width:80px;flex-shrink:0;text-align:right}
+.task-row.overdue{background:#FFF0F0;border-left:3px solid var(--red)}
+.task-row.blocked{background:#FFF0F0;border-left:3px solid #922B21}
+.task-row.complete{opacity:.6}
+
+.person-card{border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;background:#fff}
+.person-card .pname{font-size:15px;font-weight:700;color:var(--navy)}
+.person-card .prole{font-size:11px;color:var(--muted)}
+.person-card .pcontact{font-size:11px;color:var(--text);margin-top:4px}
+
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.filter-bar select,.filter-bar input{padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-size:12px}
+
+.recovery-box{background:#FFF3F0;border:1px solid var(--red);border-radius:6px;padding:10px 14px;margin-top:6px}
+.recovery-box .rtitle{font-weight:700;color:var(--red);font-size:12px;margin-bottom:4px}
+.recovery-box textarea{width:100%;border:1px solid #ddd;border-radius:3px;padding:6px;font-size:12px;margin-top:4px}
+
+.alloc-warn{background:#FEF3CD;border:1px solid var(--amber);border-radius:4px;padding:3px 8px;font-size:10px;color:#856404;font-weight:600}
+
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:12px}
+.tab{padding:6px 16px;font-size:12px;font-weight:600;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.act{color:var(--blue);border-bottom-color:var(--blue)}
+
+@media(max-width:900px){.side{display:none}.main{margin-left:0}}
+@media print{.side,.hdr{display:none!important}.main{margin:0!important;padding:8px!important}}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:#f1f1f1}::-webkit-scrollbar-thumb{background:#c1c1c1;border-radius:4px}
+</style>
+</head>
+<body>
+<header class="hdr">
+<div class="logo"><span>abh</span></div><div class="sep">|</div><div class="ttl">St Marys → Erskine Park Relocation Command Centre</div>
+<div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn green" onclick="saveAll()">💾 Save</button><button class="hbtn" onclick="exportJSON()">📥 Export</button><button class="hbtn" onclick="importJSON()">📤 Import</button></div>
+</header>
+<nav class="side">
+<div class="sec">Command</div>
+<div class="ni act" data-p="dash"><span class="ic">📊</span>Dashboard</div>
+<div class="ni" data-p="today"><span class="ic">📌</span>Today<span class="bg" id="todayBg">0</span></div>
+<div class="ni" data-p="week"><span class="ic">📅</span>This Week</div>
+<div class="ni" data-p="person"><span class="ic">👤</span>My Tasks</div>
+<div class="sec">Planning</div>
+<div class="ni" data-p="schedule"><span class="ic">📋</span>Master Schedule</div>
+<div class="ni" data-p="critical"><span class="ic">⚡</span>Critical Path<span class="bg" id="critBg">0</span></div>
+<div class="ni" data-p="decisions"><span class="ic">🔴</span>Decisions<span class="bg" id="decBg">0</span></div>
+<div class="sec">Resources</div>
+<div class="ni" data-p="team"><span class="ic">👥</span>Team & Contacts</div>
+<div class="ni" data-p="unalloc"><span class="ic">⚠️</span>Unallocated<span class="bg" id="unaBg">0</span></div>
+<div class="sec">Tracking</div>
+<div class="ni" data-p="overdue"><span class="ic">🔥</span>Late & Blocked<span class="bg" id="lateBg">0</span></div>
+<div class="ni" data-p="stock"><span class="ic">📦</span>Stock Build</div>
+<div class="ni" data-p="risks"><span class="ic">⚠️</span>Risks</div>
+<div class="ni" data-p="budget"><span class="ic">💰</span>Budget</div>
+<div class="ni" data-p="compliance"><span class="ic">✅</span>Compliance</div>
+<div class="ni" data-p="changelog"><span class="ic">📝</span>Change Log</div>
+</nav>
+<div class="main" id="mainArea"></div>
+
+<!-- TASK MODAL -->
+<div class="modal-ov" id="taskMod">
+<div class="modal">
+<div class="mh"><h3 id="tmTitle">Task</h3><button class="mx" onclick="closeMod('taskMod')">×</button></div>
+<div class="mb" id="tmBody"></div>
+<div class="mf"><button class="btn btn-o" onclick="closeMod('taskMod')">Cancel</button><button class="btn btn-p" onclick="saveTask()">Save</button><button class="btn btn-r" id="tmDel" onclick="deleteTask()" style="display:none">Delete</button></div>
+</div></div>
+
+<!-- CONTACT MODAL -->
+<div class="modal-ov" id="conMod">
+<div class="modal">
+<div class="mh"><h3>Contact</h3><button class="mx" onclick="closeMod('conMod')">×</button></div>
+<div class="mb" id="conBody"></div>
+<div class="mf"><button class="btn btn-o" onclick="closeMod('conMod')">Cancel</button><button class="btn btn-p" onclick="saveCon()">Save</button></div>
+</div></div>
+
+<!-- DECISION MODAL -->
+<div class="modal-ov" id="decMod">
+<div class="modal">
+<div class="mh"><h3 id="decModTitle">Decision</h3><button class="mx" onclick="closeMod('decMod')">×</button></div>
+<div class="mb" id="decModBody"></div>
+<div class="mf"><button class="btn btn-o" onclick="closeMod('decMod')">Cancel</button><button class="btn btn-p" onclick="saveDec()">Save</button></div>
+</div></div>
+
+<input type="file" id="fileImport" accept=".json" style="display:none" onchange="doImport(event)">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+// ===================================================================
+// ABH RELOCATION COMMAND CENTRE — SUPABASE-BACKED
+// ===================================================================
+
+const SB_URL='https://gdfbpvzatnqmzujagtqm.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkZmJwdnphdG5xbXp1amFndHFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2MzE3NTQsImV4cCI6MjA5MDIwNzc1NH0.O0XquoCFEaIL0xJZKGaPrFgfz42A_j1uKRUjhr6Zqvw';
+const sb=supabase.createClient(SB_URL,SB_KEY);
+
+const DL=new Date('2026-06-30'),SD=new Date('2026-04-07');
+const WS=[
+{id:'stock',n:'Stock Build & Transition',c:'#F39C12'},{id:'spares',n:'Spare Parts & Workshop',c:'#7F8C8D'},
+{id:'utilities',n:'Utilities & Boiler',c:'#E67E22'},{id:'caska',n:'Cask Line A',c:'#2980B9'},
+{id:'caskb',n:'Cask Line B',c:'#8E44AD'},{id:'bottle',n:'Bottle Line',c:'#16A085'},
+{id:'water',n:'Water Treatment / RO',c:'#2C3E50'},{id:'qa',n:'QA / Compliance',c:'#27AE60'},
+{id:'office',n:'Office & IT',c:'#1ABC9C'},{id:'decom',n:'Decommission & Make Good',c:'#C0392B'}
+];
+const ROLES=['Project Manager','Site Supervisor (St Marys)','Site Supervisor (EP)','Licensed Electrician','Licensed Plumber','Mechanical Fitter','Rigger/Crane Operator','Removalist Team Leader','RO/Water Treatment Tech (Veolia)','Scholle/SIG Engineer','HMPS Technician','Bottle Line Technician','QA Manager','IT/Comms Technician','Landlord (St Marys)','Landlord (EP/Goodmans)','Council (Penrith)','Sydney Water','Waste Removal','Cleaning Contractor','Signage Contractor'];
+
+let D={tasks:[],contacts:[],risks:[],budget:[],changes:[],decisions:[],stock:[],compliance:{pre:[],post:[],reg:[],landlord:[],insurance:[]}};
+let editIdx=-1,editConIdx=-1,editDecIdx=-1;
+let dbReady=false;
+
+// === SUPABASE DATA LAYER ===
+
+// Map DB rows to app format
+function dbToTask(r){return{id:r.id,ws:r.ws,desc:r.description,plannedStart:r.planned_start||'',plannedFinish:r.planned_finish||'',duration:r.duration,actualStart:r.actual_start||'',actualFinish:r.actual_finish||'',status:r.status,role:r.role||'',person:r.person||'',preds:r.predecessors||'',notes:r.notes||'',critical:r.critical||false,recovery:r.recovery||''};}
+function taskToDb(t){return{id:t.id,ws:t.ws,description:t.desc,planned_start:t.plannedStart||null,planned_finish:t.plannedFinish||null,duration:t.duration,actual_start:t.actualStart||null,actual_finish:t.actualFinish||null,status:t.status,role:t.role||'',person:t.person||'',predecessors:t.preds||'',notes:t.notes||'',critical:t.critical||false,recovery:t.recovery||''};}
+function dbToContact(r){return{id:r.id,role:r.role,name:r.name||'',company:r.company||'',mobile:r.mobile||'',email:r.email||'',avail:r.availability||'',rate:r.rate||'',notes:r.notes||''};}
+function contactToDb(c){return{role:c.role,name:c.name||'',company:c.company||'',mobile:c.mobile||'',email:c.email||'',availability:c.avail||'',rate:c.rate||'',notes:c.notes||''};}
+function dbToDec(r){return{id:r.id,title:r.title,owner:r.owner||'',deadline:r.deadline||'',status:r.status,options:r.options||'',impact:r.impact||'',notes:r.notes||'',resolution:r.resolution||'',resolvedDate:r.resolved_date||''};}
+function decToDb(d){return{id:d.id,title:d.title,owner:d.owner||'',deadline:d.deadline||null,status:d.status,options:d.options||'',impact:d.impact||'',notes:d.notes||'',resolution:d.resolution||'',resolved_date:d.resolvedDate||null};}
+function dbToRisk(r){return{id:r.id,cat:r.category,desc:r.description,like:r.likelihood,impact:r.impact,mit:r.mitigation||'',owner:r.owner||'',status:r.status};}
+function riskToDb(r){return{category:r.cat,description:r.desc,likelihood:r.like,impact:r.impact,mitigation:r.mit||'',owner:r.owner||'',status:r.status};}
+function dbToBudget(r){return{id:r.id,cat:r.category,desc:r.description,est:r.estimated||0,quoted:r.quoted||'',actual:r.actual||'',po:r.po_number||'',paid:r.paid||'No',notes:r.notes||''};}
+function budgetToDb(b){return{category:b.cat,description:b.desc,estimated:+b.est||0,quoted:+b.quoted||0,actual:+b.actual||0,po_number:b.po||'',paid:b.paid||'No',notes:b.notes||''};}
+function dbToStock(r){return{id:r.id,sku:r.sku,current:r.current_stock||'',demand:r.weekly_demand||'',buffer:r.buffer_required||'',bufferWks:r.buffer_weeks||4,status:r.status||'Not Started',lastSM:r.last_run_sm||'',firstEP:r.first_run_ep||'',notes:r.notes||''};}
+function stockToDb(s){return{sku:s.sku,current_stock:s.current||'',weekly_demand:s.demand||'',buffer_required:s.buffer||'',buffer_weeks:s.bufferWks||4,status:s.status||'Not Started',last_run_sm:s.lastSM||'',first_run_ep:s.firstEP||'',notes:s.notes||''};}
+function dbToComp(r){return{id:r.id,item:r.item,done:r.done||false,date:r.completion_date||'',notes:r.notes||'',section:r.section};}
+function compToDb(c,section){return{section:section,item:c.item,done:c.done||false,completion_date:c.date||null,notes:c.notes||'',sort_order:0};}
+function dbToChange(r){return{id:r.id,date:r.change_date||'',desc:r.description,by:r.raised_by||'',impact:r.impact||'',approved:r.approved||'Pending',approvedBy:r.approved_by||''};}
+function changeToDb(c){return{change_date:c.date||null,description:c.desc,raised_by:c.by||'',impact:c.impact||'',approved:c.approved||'Pending',approved_by:c.approvedBy||''};}
+
+// Load all data from Supabase
+async function loadAll(){
+  try{
+    const [tRes,cRes,dRes,rRes,bRes,sRes,compRes,clRes]=await Promise.all([
+      sb.from('tasks').select('*').order('id'),
+      sb.from('contacts').select('*').order('id'),
+      sb.from('decisions').select('*').order('id'),
+      sb.from('risks').select('*').order('id'),
+      sb.from('budget_items').select('*').order('id'),
+      sb.from('stock_build').select('*').order('id'),
+      sb.from('compliance_items').select('*').order('section,sort_order,id'),
+      sb.from('change_log').select('*').order('id')
+    ]);
+    // If tasks table is empty, seed the database
+    if(!tRes.data||tRes.data.length===0){
+      toast('First run — seeding database...');
+      await seedDb();
+      return loadAll();
+    }
+    D.tasks=(tRes.data||[]).map(dbToTask);
+    D.contacts=(cRes.data||[]).map(dbToContact);
+    D.decisions=(dRes.data||[]).map(dbToDec);
+    D.risks=(rRes.data||[]).map(dbToRisk);
+    D.budget=(bRes.data||[]).map(dbToBudget);
+    D.stock=(sRes.data||[]).map(dbToStock);
+    D.changes=(clRes.data||[]).map(dbToChange);
+    // Group compliance by section
+    const compRows=(compRes.data||[]).map(dbToComp);
+    D.compliance={pre:[],post:[],reg:[],landlord:[],insurance:[]};
+    compRows.forEach(c=>{if(D.compliance[c.section])D.compliance[c.section].push(c);});
+    dbReady=true;
+  }catch(err){
+    console.error('Supabase load failed, falling back to localStorage:',err);
+    const s=localStorage.getItem('abh_rc2');if(s)D=JSON.parse(s);else seed();
+    dbReady=false;
+  }
+}
+
+// Save helpers — individual record upserts
+async function dbSaveTask(t){const d=taskToDb(t);await sb.from('tasks').upsert(d,{onConflict:'id'});}
+async function dbSaveContact(c){if(c.id){const d=contactToDb(c);await sb.from('contacts').update(d).eq('id',c.id);}else{const d=contactToDb(c);const{data}=await sb.from('contacts').insert(d).select();if(data&&data[0])c.id=data[0].id;}}
+async function dbSaveDec(d){await sb.from('decisions').upsert(decToDb(d),{onConflict:'id'});}
+async function dbSaveRisk(r){if(r.id){const d=riskToDb(r);await sb.from('risks').update(d).eq('id',r.id);}else{const d=riskToDb(r);const{data}=await sb.from('risks').insert(d).select();if(data&&data[0])r.id=data[0].id;}}
+async function dbSaveBudget(b){if(b.id){const d=budgetToDb(b);await sb.from('budget_items').update(d).eq('id',b.id);}else{const d=budgetToDb(b);const{data}=await sb.from('budget_items').insert(d).select();if(data&&data[0])b.id=data[0].id;}}
+async function dbSaveStock(s){if(s.id){const d=stockToDb(s);await sb.from('stock_build').update(d).eq('id',s.id);}}
+async function dbSaveComp(c){if(c.id){await sb.from('compliance_items').update({done:c.done,completion_date:c.date||null,notes:c.notes||''}).eq('id',c.id);}}
+async function dbSaveChange(c){if(c.id){const d=changeToDb(c);await sb.from('change_log').update(d).eq('id',c.id);}else{const d=changeToDb(c);const{data}=await sb.from('change_log').insert(d).select();if(data&&data[0])c.id=data[0].id;}}
+async function dbDeleteTask(id){await sb.from('tasks').delete().eq('id',id);}
+async function dbLog(table,recordId,action,details){await sb.from('activity_log').insert({table_name:table,record_id:recordId,action,details}).catch(()=>{});}
+
+// Full save (used by Save button — syncs all in-memory to DB)
+async function saveAll(){
+  if(!dbReady){localStorage.setItem('abh_rc2',JSON.stringify(D));toast('Saved (offline)');return;}
+  try{
+    // Upsert all tasks
+    const taskRows=D.tasks.map(taskToDb);
+    await sb.from('tasks').upsert(taskRows,{onConflict:'id'});
+    toast('Saved to database');
+  }catch(err){
+    console.error('Save failed:',err);
+    localStorage.setItem('abh_rc2',JSON.stringify(D));
+    toast('Save failed — saved offline');
+  }
+}
+
+function exportJSON(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='ABH_Relocation_'+iso(new Date())+'.json';a.click();URL.revokeObjectURL(u);}
+function importJSON(){document.getElementById('fileImport').click();}
+async function doImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{try{D=JSON.parse(ev.target.result);await saveAll();location.reload();}catch(e){alert('Invalid JSON');}};r.readAsText(f);}
+function toast(m){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:16px;right:16px;background:#1B2A4A;color:#fff;padding:8px 18px;border-radius:5px;font-size:12px;z-index:999;opacity:0;transition:opacity .2s;';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.style.opacity='1');setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),200);},1500);}
+
+// --- date helpers ---
+function iso(d){if(!d)return'';return new Date(d).toISOString().split('T')[0];}
+function fmt(d){if(!d)return'';const x=new Date(d);return x.toLocaleDateString('en-AU',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});}
+function fmtShort(d){if(!d)return'';const x=new Date(d);return x.toLocaleDateString('en-AU',{day:'2-digit',month:'2-digit'});}
+function add(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function diffD(a,b){return Math.ceil((new Date(b)-new Date(a))/864e5);}
+function isWE(d){const day=new Date(d).getDay();return day===0||day===6;}
+function dayName(d){return new Date(d).toLocaleDateString('en-AU',{weekday:'long'});}
+function weekStart(d){const x=new Date(d);const day=x.getDay();const diff=x.getDate()-day+(day===0?-6:1);return new Date(x.setDate(diff));}
+function today(){return iso(new Date());}
+
+// --- status html ---
+function stH(s){const m={Complete:'st-c','In Progress':'st-p','Not Started':'st-n',Blocked:'st-b','On Hold':'st-h',Overdue:'st-o'};return`<span class="st ${m[s]||'st-n'}">${s}</span>`;}
+function effSt(t){const td=today();if(t.status==='Complete')return'Complete';if(t.status==='Blocked')return'Blocked';if(t.status==='On Hold')return'On Hold';if(t.plannedFinish<td&&t.status!=='Complete')return'Overdue';return t.status;}
+function wsC(id){return WS.find(w=>w.id===id)?.c||'#ccc';}
+function wsN(id){return WS.find(w=>w.id===id)?.n||id;}
+function getPerson(t){if(t.person)return t.person;if(t.role){const c=D.contacts.find(x=>x.role===t.role&&x.name);return c?c.name:'';}return'';}
+
+// --- nav ---
+document.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>{
+document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));n.classList.add('act');showPage(n.dataset.p);
+}));
+function showPage(p){const m=document.getElementById('mainArea');
+switch(p){
+case'dash':renderDash(m);break;case'today':renderToday(m);break;case'week':renderWeek(m);break;
+case'person':renderPerson(m);break;case'schedule':renderSchedule(m);break;case'critical':renderCritical(m);break;
+case'decisions':renderDecisions(m);break;case'team':renderTeam(m);break;case'unalloc':renderUnalloc(m);break;
+case'overdue':renderOverdue(m);break;case'stock':renderStock(m);break;case'risks':renderRisks(m);break;
+case'budget':renderBudget(m);break;case'compliance':renderComp(m);break;case'changelog':renderCL(m);break;
+}}
+function openMod(id){document.getElementById(id).classList.add('open');}
+function closeMod(id){document.getElementById(id).classList.remove('open');}
+function updBadges(){
+const td=today();
+const todayTasks=D.tasks.filter(t=>t.plannedStart<=td&&t.plannedFinish>=td&&t.status!=='Complete');
+document.getElementById('todayBg').textContent=todayTasks.length;
+const crit=D.tasks.filter(t=>t.critical&&t.status!=='Complete').length;
+document.getElementById('critBg').textContent=crit;
+const dec=D.decisions.filter(d=>d.status==='Open').length;
+document.getElementById('decBg').textContent=dec;
+const una=D.tasks.filter(t=>!getPerson(t)&&t.status!=='Complete').length;
+document.getElementById('unaBg').textContent=una;
+const late=D.tasks.filter(t=>{const s=effSt(t);return s==='Overdue'||s==='Blocked';}).length;
+document.getElementById('lateBg').textContent=late;
+const dl=diffD(new Date(),DL);
+document.getElementById('hdrDead').textContent=dl+' days to exit | 30/06/2026';
+}
+
+// === DASHBOARD ===
+function renderDash(el){
+const td=today(),ts=D.tasks,total=ts.length;
+const comp=ts.filter(t=>t.status==='Complete').length;
+const prog=ts.filter(t=>t.status==='In Progress').length;
+const blk=ts.filter(t=>t.status==='Blocked').length;
+const od=ts.filter(t=>t.plannedFinish<td&&t.status!=='Complete').length;
+const pct=total?Math.round(comp/total*100):0;
+const dl=diffD(new Date(),DL);
+const openDec=D.decisions.filter(d=>d.status==='Open').length;
+const openRisk=D.risks.filter(r=>r.status==='Open'&&r.like*r.impact>=12).length;
+const una=ts.filter(t=>!getPerson(t)&&t.status!=='Complete').length;
+const todayTs=ts.filter(t=>t.plannedStart<=td&&t.plannedFinish>=td&&t.status!=='Complete');
+
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px">Executive Dashboard</h2>
+<div class="kpi-g">
+<div class="kpi ${pct>=80?'g':pct>=50?'a':'r'}" onclick="showPage('schedule')"><div class="kl">Overall Progress</div><div class="kv">${pct}%</div><div class="ks">${comp} of ${total} tasks done</div></div>
+<div class="kpi ${dl>30?'g':dl>14?'a':'r'}"><div class="kl">Days to Exit</div><div class="kv">${dl}</div><div class="ks">Hard deadline 30/06/2026</div></div>
+<div class="kpi ${od===0?'g':'r'}" onclick="showPage('overdue')"><div class="kl">Overdue</div><div class="kv">${od}</div><div class="ks">Click to view all late tasks</div></div>
+<div class="kpi ${blk===0?'g':'r'}" onclick="showPage('overdue')"><div class="kl">Blocked</div><div class="kv">${blk}</div><div class="ks">${blk>0?'REQUIRES ACTION':''}</div></div>
+<div class="kpi ${openDec===0?'g':'r'}" onclick="showPage('decisions')"><div class="kl">Open Decisions</div><div class="kv">${openDec}</div><div class="ks">Click to resolve →</div></div>
+<div class="kpi ${una===0?'g':'a'}" onclick="showPage('unalloc')"><div class="kl">Unallocated Tasks</div><div class="kv">${una}</div><div class="ks">${una>0?'Need person assigned':'All allocated'}</div></div>
+<div class="kpi b" onclick="showPage('today')"><div class="kl">Today's Tasks</div><div class="kv">${todayTs.length}</div><div class="ks">Click for today's plan →</div></div>
+<div class="kpi ${openRisk===0?'g':'a'}" onclick="showPage('risks')"><div class="kl">High Risks (Open)</div><div class="kv">${openRisk}</div><div class="ks">${D.risks.filter(r=>r.status==='Open').length} total open</div></div>
+</div>`;
+
+// Work stream progress
+h+=`<div class="card"><div class="ch"><h3>Work Stream Progress</h3></div><div class="cb">`;
+WS.forEach(ws=>{const wt=ts.filter(t=>t.ws===ws.id),wd=wt.filter(t=>t.status==='Complete').length,wp=wt.length?Math.round(wd/wt.length*100):0;
+const wod=wt.filter(t=>effSt(t)==='Overdue').length;
+h+=`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;"><div style="width:8px;height:8px;border-radius:2px;background:${ws.c};flex-shrink:0;"></div><div style="flex:1;font-size:11px;">${ws.n}</div>${wod?`<span class="st st-o">${wod} late</span>`:''}<div style="width:140px;height:6px;background:#eee;border-radius:3px;overflow:hidden;"><div style="height:100%;width:${wp}%;background:${ws.c};border-radius:3px;"></div></div><div style="font-size:10px;font-weight:700;width:32px;text-align:right;">${wp}%</div></div>`;
+});
+h+=`</div></div>`;
+
+// Today's tasks preview
+h+=`<div class="card"><div class="ch" style="background:var(--blue);"><h3 style="color:#fff;">📌 Today — ${fmt(new Date())}</h3><button class="btn" style="margin-left:auto;background:rgba(255,255,255,.2);color:#fff;font-size:10px;" onclick="showPage('today')">Full View →</button></div><div class="cb" style="padding:0;">`;
+if(todayTs.length){todayTs.slice(0,8).forEach(t=>{h+=taskRowHtml(t);});}
+else h+='<div style="padding:12px;color:var(--green);font-weight:600;">No tasks scheduled today ✓</div>';
+h+=`</div></div>`;
+
+el.innerHTML=h;
+}
+
+// === TODAY VIEW ===
+function renderToday(el){
+const td=today();
+const tasks=D.tasks.filter(t=>t.plannedStart<=td&&t.plannedFinish>=td);
+const byPerson={};
+tasks.forEach(t=>{const p=getPerson(t)||'⚠ UNALLOCATED';if(!byPerson[p])byPerson[p]=[];byPerson[p].push(t);});
+
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">📌 Today — ${fmt(new Date())} (${dayName(new Date())})</h2>
+<div style="font-size:12px;color:var(--muted);">${tasks.length} tasks | ${tasks.filter(t=>t.status==='Complete').length} done | ${tasks.filter(t=>effSt(t)==='Overdue').length} overdue</div></div>`;
+
+// Group by person
+const people=Object.keys(byPerson).sort((a,b)=>a==='⚠ UNALLOCATED'?1:b==='⚠ UNALLOCATED'?-1:a.localeCompare(b));
+people.forEach(p=>{
+const pts=byPerson[p];
+const done=pts.filter(t=>t.status==='Complete').length;
+h+=`<div class="card"><div class="ch" ${p==='⚠ UNALLOCATED'?'style="background:#FEF3CD;"':''}><h3>${p}</h3><span style="margin-left:auto;font-size:11px;color:var(--muted);">${done}/${pts.length} done</span></div><div class="cb" style="padding:0;">`;
+pts.sort((a,b)=>(a.status==='Complete'?1:0)-(b.status==='Complete'?1:0)).forEach(t=>{h+=taskRowHtml(t,true);});
+h+=`</div></div>`;
+});
+
+if(!tasks.length) h+=`<div class="card"><div class="cb" style="text-align:center;padding:40px;color:var(--muted);">No tasks scheduled for today.</div></div>`;
+el.innerHTML=h;
+}
+
+// === WEEK VIEW ===
+function renderWeek(el){
+const td=new Date();
+const ws=weekStart(td);
+const days=[];for(let i=0;i<7;i++)days.push(iso(add(ws,i)));
+
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">📅 This Week — ${fmt(ws)} to ${fmt(add(ws,6))}</h2>`;
+
+days.forEach(d=>{
+const tasks=D.tasks.filter(t=>t.plannedStart<=d&&t.plannedFinish>=d);
+const isToday=d===today();
+const isPast=d<today();
+const we=isWE(d);
+const done=tasks.filter(t=>t.status==='Complete').length;
+
+h+=`<div class="day-card"><div class="dh ${isToday?'today':isPast?'past':we?'weekend':'future'}">${dayName(d)} ${fmtShort(d)}${isToday?' — TODAY':''}${we?' (Weekend)':''}<span style="margin-left:auto;font-size:10px;">${done}/${tasks.length} done</span></div><div class="db">`;
+if(tasks.length){tasks.sort((a,b)=>(a.status==='Complete'?1:0)-(b.status==='Complete'?1:0)).forEach(t=>{h+=taskRowHtml(t,true);});}
+else h+=`<div style="padding:8px 12px;font-size:11px;color:var(--muted);">${we?'Weekend — available for catch-up if needed':'No tasks scheduled'}</div>`;
+h+=`</div></div>`;
+});
+el.innerHTML=h;
+}
+
+// === PERSON VIEW ===
+function renderPerson(el){
+const people=[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))];
+let selPerson=people[0]||'';
+
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">👤 My Tasks — 120-Day View</h2>
+<div class="filter-bar"><select id="personSel" onchange="renderPersonTasks()">`;
+if(!people.length)h+=`<option value="">No contacts with names yet — add names in Team & Contacts</option>`;
+people.forEach(p=>{h+=`<option value="${p}">${p}</option>`;});
+h+=`</select></div><div id="personContent"></div>`;
+el.innerHTML=h;
+renderPersonTasks();
+}
+function renderPersonTasks(){
+const sel=document.getElementById('personSel');if(!sel)return;
+const name=sel.value;if(!name){document.getElementById('personContent').innerHTML='<p style="color:var(--muted);">Select a person or add names in Team & Contacts first.</p>';return;}
+
+const tasks=D.tasks.filter(t=>getPerson(t)===name).sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart));
+const td=today();
+let h='';
+
+// Group by week
+const weeks={};
+tasks.forEach(t=>{
+const ws=iso(weekStart(new Date(t.plannedStart)));
+if(!weeks[ws])weeks[ws]=[];weeks[ws].push(t);
+});
+
+const contact=D.contacts.find(c=>c.name===name);
+if(contact){
+h+=`<div class="person-card"><div class="pname">${name}</div><div class="prole">${contact.role}</div>`;
+if(contact.mobile||contact.email)h+=`<div class="pcontact">${contact.mobile||''} ${contact.email?'| '+contact.email:''}</div>`;
+h+=`<div style="margin-top:8px;font-size:12px;"><strong>${tasks.length}</strong> total tasks | <strong>${tasks.filter(t=>t.status==='Complete').length}</strong> done | <strong style="color:var(--red);">${tasks.filter(t=>effSt(t)==='Overdue').length}</strong> overdue</div></div>`;
+}
+
+Object.keys(weeks).sort().forEach(wk=>{
+const wkTs=weeks[wk];
+const wkEnd=iso(add(new Date(wk),6));
+const isPast=wkEnd<td;
+h+=`<div class="day-card"><div class="dh ${isPast?'past':'future'}">Week of ${fmt(wk)}<span style="margin-left:auto;font-size:10px;">${wkTs.filter(t=>t.status==='Complete').length}/${wkTs.length}</span></div><div class="db">`;
+wkTs.forEach(t=>{h+=taskRowHtml(t,true,true);});
+h+=`</div></div>`;
+});
+
+document.getElementById('personContent').innerHTML=h;
+}
+
+// === TASK ROW HTML ===
+function taskRowHtml(t,showCheck=false,showDates=false){
+const s=effSt(t);const person=getPerson(t);
+const wsObj=WS.find(w=>w.id===t.ws);
+let cls='task-row';if(s==='Overdue')cls+=' overdue';if(s==='Blocked')cls+=' blocked';if(s==='Complete')cls+=' complete';
+let h=`<div class="${cls}" style="border-left:3px solid ${wsObj?.c||'#ccc'};">`;
+if(showCheck)h+=`<input type="checkbox" class="tcheck" ${t.status==='Complete'?'checked':''} onchange="toggleTask(${t.id},this.checked)">`;
+h+=`<div class="tid">${t.id}${t.critical?'<span style="color:var(--red);">⚡</span>':''}</div>`;
+h+=`<div class="tdesc"><div class="tname">${t.desc}</div><div class="tmeta">${wsObj?.n||t.ws}${showDates?' | '+fmtShort(t.plannedStart)+' → '+fmtShort(t.plannedFinish):''} | ${t.duration}d${t.preds?' | depends: '+t.preds:''}${t.notes?' | <em>'+t.notes+'</em>':''}</div></div>`;
+h+=`<div class="tperson">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</div>`;
+h+=`<div class="tst">${stH(s)}</div>`;
+h+=`<button class="btn btn-o" style="padding:2px 6px;font-size:10px;flex-shrink:0;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button>`;
+h+=`</div>`;
+return h;
+}
+
+function toggleTask(id,checked){
+const t=D.tasks.find(x=>x.id===id);if(!t)return;
+if(checked){t.status='Complete';t.actualFinish=today();if(!t.actualStart)t.actualStart=today();}
+else{t.status='In Progress';t.actualFinish='';}
+dbSaveTask(t).then(()=>dbLog('tasks',t.id,checked?'complete':'reopen',''));
+showPage(document.querySelector('.ni.act')?.dataset.p||'dash');updBadges();
+}
+
+// === MASTER SCHEDULE ===
+function renderSchedule(el){
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">Master Schedule — All Tasks</h2>
+<button class="btn btn-p" onclick="openNewTask()">+ Add Task</button></div>
+<div class="filter-bar">
+<select id="sFws" onchange="reSchedule()"><option value="">All Streams</option>${WS.map(w=>`<option value="${w.id}">${w.n}</option>`).join('')}</select>
+<select id="sFst" onchange="reSchedule()"><option value="">All Status</option><option>Not Started</option><option>In Progress</option><option>Complete</option><option>Blocked</option><option>On Hold</option><option>Overdue</option></select>
+<select id="sFper" onchange="reSchedule()"><option value="">All People</option>${[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))].map(n=>`<option>${n}</option>`).join('')}</select>
+<input type="text" placeholder="Search..." id="sFq" oninput="reSchedule()" style="width:180px;">
+<label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sFcrit" onchange="reSchedule()"> Critical only</label>
+</div>
+<div style="overflow:auto;max-height:calc(100vh - 200px);" id="schedDiv"></div>`;
+el.innerHTML=h;reSchedule();
+}
+function reSchedule(){
+const fws=document.getElementById('sFws')?.value||'';
+const fst=document.getElementById('sFst')?.value||'';
+const fper=document.getElementById('sFper')?.value||'';
+const fq=(document.getElementById('sFq')?.value||'').toLowerCase();
+const fcrit=document.getElementById('sFcrit')?.checked||false;
+const td=today();
+
+let tasks=D.tasks.slice();
+if(fws)tasks=tasks.filter(t=>t.ws===fws);
+if(fst==='Overdue')tasks=tasks.filter(t=>effSt(t)==='Overdue');
+else if(fst)tasks=tasks.filter(t=>t.status===fst);
+if(fper)tasks=tasks.filter(t=>getPerson(t)===fper);
+if(fq)tasks=tasks.filter(t=>t.desc.toLowerCase().includes(fq)||(t.notes||'').toLowerCase().includes(fq));
+if(fcrit)tasks=tasks.filter(t=>t.critical);
+
+let h=`<table class="dt"><thead><tr><th>ID</th><th>Stream</th><th style="min-width:280px;">Task</th><th>Person</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th>Deps</th><th>Notes</th><th></th></tr></thead><tbody>`;
+tasks.forEach(t=>{
+const s=effSt(t);const person=getPerson(t);
+h+=`<tr style="border-left:3px solid ${wsC(t.ws)};${t.critical?'background:#FFF8F6;':''}${s==='Overdue'?'background:#FFF0F0;':''}">
+<td><strong>${t.id}</strong>${t.critical?' ⚡':''}</td>
+<td style="font-size:10px;">${wsN(t.ws)}</td>
+<td>${t.desc}${t.recovery?'<div class="recovery-box"><div class="rtitle">Recovery Plan:</div>'+t.recovery+'</div>':''}</td>
+<td style="font-size:11px;">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</td>
+<td style="font-size:11px;white-space:nowrap;">${fmtShort(t.plannedStart)}</td>
+<td style="font-size:11px;white-space:nowrap;">${fmtShort(t.plannedFinish)}</td>
+<td>${t.duration}d</td>
+<td>${stH(s)}</td>
+<td style="font-size:10px;">${t.preds||'—'}</td>
+<td style="font-size:10px;max-width:200px;">${t.notes||''}</td>
+<td><button class="btn btn-o" style="padding:2px 6px;font-size:10px;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></td></tr>`;
+});
+h+=`</tbody></table>`;
+document.getElementById('schedDiv').innerHTML=h;
+}
+
+// === CRITICAL PATH ===
+function renderCritical(el){
+const td=today();
+const crit=D.tasks.filter(t=>t.critical&&t.status!=='Complete');
+const od=crit.filter(t=>effSt(t)==='Overdue');
+
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">⚡ Critical Path — Zero Float</h2>`;
+if(od.length){
+h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">🔥 ${od.length} CRITICAL TASKS ARE LATE — RECOVERY REQUIRED</h3></div><div class="cb" style="padding:0;">`;
+od.forEach(t=>{
+h+=taskRowHtml(t,false,true);
+h+=`<div style="padding:4px 12px 8px 54px;"><div class="recovery-box"><div class="rtitle">Recovery Plan</div>
+<textarea rows="2" placeholder="What is the plan to get this back on track? Who is accountable? What date will it be resolved?" style="width:100%;" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div></div>`;
+});
+h+=`</div></div>`;
+}
+
+h+=`<div class="card"><div class="ch"><h3>Critical Path Tasks (${crit.length} remaining)</h3></div><div class="cb" style="padding:0;">`;
+crit.sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart)).forEach(t=>{h+=taskRowHtml(t,true,true);});
+h+=`</div></div>`;
+
+// Near-critical
+const nearCrit=D.tasks.filter(t=>!t.critical&&t.preds&&t.status!=='Complete').slice(0,20);
+h+=`<div class="card"><div class="ch"><h3>🟡 Near-Critical — Dependent Tasks</h3></div><div class="cb" style="padding:0;">`;
+nearCrit.forEach(t=>{h+=taskRowHtml(t,false,true);});
+h+=`</div></div>`;
+
+el.innerHTML=h;
+}
+
+// === DECISIONS ===
+function renderDecisions(el){
+const open=D.decisions.filter(d=>d.status==='Open');
+const resolved=D.decisions.filter(d=>d.status!=='Open');
+
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">🔴 Decisions Required — ${open.length} Open</h2>
+<button class="btn btn-p" onclick="openNewDec()">+ Add Decision</button></div>`;
+
+if(open.length){
+h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">OPEN — Must Be Resolved</h3></div><div class="cb">`;
+open.forEach(d=>{
+const overdue=d.deadline<today();
+h+=`<div style="padding:10px 0;border-bottom:1px solid #eee;${overdue?'background:#FFF0F0;margin:0 -14px;padding:10px 14px;':''}">
+<div style="display:flex;align-items:flex-start;gap:10px;">
+<div style="width:28px;height:28px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;">${d.id}</div>
+<div style="flex:1;">
+<div style="font-weight:700;font-size:13px;">${d.title}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:4px;">
+<strong>Owner:</strong> ${d.owner} | <strong>Deadline:</strong> <span style="${overdue?'color:var(--red);font-weight:700;':''}">${fmt(d.deadline)}${overdue?' — OVERDUE':''}</span>
+${d.impact?'| <strong>Impact if delayed:</strong> '+d.impact:''}
+${d.options?'| <strong>Options:</strong> '+d.options:''}
+${d.notes?'<br><strong>Notes:</strong> '+d.notes:''}
+</div>
+<div style="margin-top:6px;display:flex;gap:6px;">
+<button class="btn btn-g" style="font-size:10px;" onclick="resolveDec(${d.id})">✓ Mark Resolved</button>
+<button class="btn btn-o" style="font-size:10px;" onclick="editDec(${D.decisions.indexOf(d)})">Edit</button>
+</div></div></div></div>`;
+});
+h+=`</div></div>`;
+}else{
+h+=`<div class="card"><div class="cb" style="text-align:center;padding:30px;color:var(--green);font-weight:700;">All decisions resolved ✓</div></div>`;
+}
+
+if(resolved.length){
+h+=`<div class="card"><div class="ch"><h3>✅ Resolved (${resolved.length})</h3></div><div class="cb">`;
+resolved.forEach(d=>{h+=`<div style="padding:6px 0;border-bottom:1px solid #eee;opacity:.7;font-size:12px;"><strong>${d.id}.</strong> ${d.title} — resolved ${d.resolvedDate?fmt(d.resolvedDate):''} ${d.resolution?'| '+d.resolution:''}</div>`;});
+h+=`</div></div>`;
+}
+el.innerHTML=h;
+}
+function resolveDec(id){const d=D.decisions.find(x=>x.id===id);if(d){d.status='Resolved';d.resolvedDate=today();dbSaveDec(d).then(()=>dbLog('decisions',d.id,'resolve',''));showPage('decisions');updBadges();}}
+
+// === TEAM & CONTACTS ===
+function renderTeam(el){
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">Team & Contacts</h2>
+<button class="btn btn-p" onclick="openNewCon()">+ Add Contact</button></div>
+<table class="dt"><thead><tr><th>Role</th><th>Name</th><th>Company</th><th>Mobile</th><th>Email</th><th>Tasks</th><th>Overdue</th><th></th></tr></thead><tbody>`;
+D.contacts.forEach((c,i)=>{
+const tasks=D.tasks.filter(t=>getPerson(t)===c.name&&c.name);
+const od=tasks.filter(t=>effSt(t)==='Overdue').length;
+h+=`<tr><td><strong>${c.role}</strong></td><td>${c.name||'<span style="color:var(--amber);font-size:10px;">NOT ASSIGNED</span>'}</td>
+<td style="font-size:11px;">${c.company||''}</td><td style="font-size:11px;">${c.mobile||''}</td><td style="font-size:11px;">${c.email||''}</td>
+<td>${c.name?tasks.length:''}</td><td>${od?`<span style="color:var(--red);font-weight:700;">${od}</span>`:c.name?'0':''}</td>
+<td><button class="btn btn-o" style="padding:2px 6px;font-size:10px;" onclick="editCon(${i})">Edit</button></td></tr>`;
+});
+h+=`</tbody></table>`;
+el.innerHTML=h;
+}
+
+// === UNALLOCATED ===
+function renderUnalloc(el){
+const una=D.tasks.filter(t=>!getPerson(t)&&t.status!=='Complete').sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart));
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:4px;">⚠ Unallocated Tasks — ${una.length} tasks need a person assigned</h2>
+<p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Every task must have a name against it. Either assign a person directly on the task, or fill in the name against the role in Team & Contacts.</p>`;
+
+// Group by needed-by date
+const urgent=una.filter(t=>diffD(today(),t.plannedStart)<=7);
+const soon=una.filter(t=>{const d=diffD(today(),t.plannedStart);return d>7&&d<=21;});
+const later=una.filter(t=>diffD(today(),t.plannedStart)>21);
+
+if(urgent.length){
+h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">🔥 Must Allocate NOW — starts within 7 days (${urgent.length})</h3></div><div class="cb" style="padding:0;">`;
+urgent.forEach(t=>{h+=taskRowHtml(t,false,true);});h+=`</div></div>`;
+}
+if(soon.length){
+h+=`<div class="card" style="border-color:var(--amber);"><div class="ch" style="background:var(--amber);"><h3 style="color:#fff;">⚠ Allocate This Week — starts within 21 days (${soon.length})</h3></div><div class="cb" style="padding:0;">`;
+soon.forEach(t=>{h+=taskRowHtml(t,false,true);});h+=`</div></div>`;
+}
+if(later.length){
+h+=`<div class="card"><div class="ch"><h3>📋 Allocate Soon — starts later (${later.length})</h3></div><div class="cb" style="padding:0;">`;
+later.forEach(t=>{h+=taskRowHtml(t,false,true);});h+=`</div></div>`;
+}
+if(!una.length)h+=`<div class="card"><div class="cb" style="text-align:center;padding:30px;color:var(--green);font-weight:700;">Every task has a person allocated ✓</div></div>`;
+el.innerHTML=h;
+}
+
+// === OVERDUE & BLOCKED ===
+function renderOverdue(el){
+const td=today();
+const overdue=D.tasks.filter(t=>effSt(t)==='Overdue').sort((a,b)=>a.plannedFinish.localeCompare(b.plannedFinish));
+const blocked=D.tasks.filter(t=>t.status==='Blocked');
+
+let h=`<h2 style="font-size:16px;color:var(--red);margin-bottom:12px;">🔥 Late & Blocked — ${overdue.length+blocked.length} tasks require action</h2>`;
+
+if(overdue.length){
+h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">OVERDUE (${overdue.length}) — Who is responsible? What is the recovery plan?</h3></div><div class="cb" style="padding:0;">`;
+overdue.forEach(t=>{
+const daysLate=diffD(t.plannedFinish,td);
+const person=getPerson(t);
+h+=`<div style="padding:8px 12px;border-bottom:1px solid #fdd;border-left:4px solid var(--red);background:#FFF8F8;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+<div><strong style="color:var(--red);">${t.id}.</strong> <strong>${t.desc}</strong>
+<div style="font-size:11px;color:var(--muted);margin-top:2px;">${wsN(t.ws)} | Due: ${fmt(t.plannedFinish)} | <strong style="color:var(--red);">${daysLate} days late</strong> | Responsible: <strong>${person||'NOBODY — ALLOCATE NOW'}</strong></div></div>
+<button class="btn btn-o" style="font-size:10px;flex-shrink:0;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></div>
+<div class="recovery-box" style="margin-top:6px;"><div class="rtitle">⚡ Recovery Plan (mandatory for overdue tasks)</div>
+<textarea rows="2" placeholder="What will be done to get this back on track? By when? Who is accountable?" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div>
+</div>`;
+});
+h+=`</div></div>`;
+}
+
+if(blocked.length){
+h+=`<div class="card" style="border-color:#922B21;"><div class="ch" style="background:#922B21;"><h3 style="color:#fff;">BLOCKED (${blocked.length})</h3></div><div class="cb" style="padding:0;">`;
+blocked.forEach(t=>{h+=taskRowHtml(t,false,true);});
+h+=`</div></div>`;
+}
+
+if(!overdue.length&&!blocked.length)h+=`<div class="card"><div class="cb" style="text-align:center;padding:30px;color:var(--green);font-weight:700;">Nothing late, nothing blocked ✓</div></div>`;
+el.innerHTML=h;
+}
+
+// === STOCK BUILD ===
+function renderStock(el){
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">📦 Stock Build & Production Transition</h2>
+<div class="kpi-g">${D.stock.map(s=>`<div class="kpi ${s.status==='Complete'?'g':s.status==='In Progress'?'b':'a'}"><div class="kl">${s.sku}</div><div class="kv">${s.status}</div><div class="ks">Buffer: ${s.bufferWks} weeks</div></div>`).join('')}</div>
+<div class="card"><div class="ch"><h3>SKU Detail</h3></div><div class="cb">
+<table class="dt"><thead><tr><th>SKU</th><th>Current (pal)</th><th>Weekly Demand</th><th>Buffer Req</th><th>Buffer Wks</th><th>Status</th><th>Last SM Run</th><th>First EP Run</th><th>Notes</th></tr></thead><tbody>`;
+D.stock.forEach((s,i)=>{h+=`<tr><td><strong>${s.sku}</strong></td>
+<td><input type="number" value="${s.current}" onchange="D.stock[${i}].current=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td><input type="number" value="${s.demand}" onchange="D.stock[${i}].demand=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td><input type="number" value="${s.buffer}" onchange="D.stock[${i}].buffer=this.value;dbSaveStock(D.stock[${i}]);" style="width:60px;padding:2px;"></td>
+<td>${s.bufferWks}</td><td>${stH(s.status)}</td><td>${s.lastSM||'TBD'}</td><td>${s.firstEP||'TBD'}</td><td style="font-size:11px;">${s.notes||''}</td></tr>`;});
+h+=`</tbody></table></div></div>`;
+el.innerHTML=h;
+}
+
+// === RISKS ===
+function renderRisks(el){
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">Risk Register</h2>
+<button class="btn btn-p" onclick="openNewRisk()">+ Add Risk</button></div>
+<div class="card"><div class="cb" style="overflow-x:auto;">
+<table class="dt"><thead><tr><th>ID</th><th>Cat</th><th>Description</th><th>L</th><th>I</th><th>Score</th><th>Mitigation</th><th>Owner</th><th>Status</th></tr></thead><tbody>`;
+D.risks.sort((a,b)=>(b.like*b.impact)-(a.like*a.impact)).forEach((r,i)=>{
+const sc=r.like*r.impact;const col=sc>=15?'var(--red)':sc>=8?'var(--amber)':'var(--green)';
+h+=`<tr><td>R${r.id}</td><td>${r.cat}</td><td>${r.desc}</td><td>${r.like}</td><td>${r.impact}</td>
+<td><span style="background:${col};color:#fff;padding:1px 6px;border-radius:3px;font-weight:700;font-size:11px;">${sc}</span></td>
+<td style="font-size:11px;">${r.mit}</td><td>${r.owner}</td>
+<td><select onchange="D.risks[${i}].status=this.value;dbSaveRisk(D.risks[${i}]);" style="font-size:11px;padding:1px;">
+<option ${r.status==='Open'?'selected':''}>Open</option><option ${r.status==='Mitigated'?'selected':''}>Mitigated</option><option ${r.status==='Closed'?'selected':''}>Closed</option></select></td></tr>`;
+});
+h+=`</tbody></table></div></div>`;
+el.innerHTML=h;
+}
+
+// === BUDGET ===
+function renderBudget(el){
+const te=D.budget.reduce((s,b)=>s+(+b.est||0),0);
+const tq=D.budget.reduce((s,b)=>s+(+b.quoted||0),0);
+const ta=D.budget.reduce((s,b)=>s+(+b.actual||0),0);
+const tv=ta-te;
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">Budget Tracker</h2>
+<div class="kpi-g">
+<div class="kpi b"><div class="kl">Estimated</div><div class="kv">$${te.toLocaleString()}</div></div>
+<div class="kpi"><div class="kl">Quoted</div><div class="kv">$${tq.toLocaleString()}</div></div>
+<div class="kpi ${ta>te?'r':'g'}"><div class="kl">Actual</div><div class="kv">$${ta.toLocaleString()}</div></div>
+<div class="kpi ${tv>0?'r':'g'}"><div class="kl">Variance</div><div class="kv">${tv>=0?'+':''}$${tv.toLocaleString()}</div></div>
+</div>
+<div class="card"><div class="ch"><h3>Items</h3><button class="btn btn-p" style="margin-left:auto;font-size:10px;" onclick="openNewBudget()">+ Add</button></div><div class="cb" style="overflow-x:auto;">
+<table class="dt"><thead><tr><th>Category</th><th>Description</th><th>Est</th><th>Quoted</th><th>Actual</th><th>Var</th><th>PO</th><th>Paid</th><th>Notes</th></tr></thead><tbody>`;
+D.budget.forEach((b,i)=>{const v=(+b.actual||0)-(+b.est||0);
+h+=`<tr><td>${b.cat}</td><td>${b.desc}</td><td>$${(+b.est||0).toLocaleString()}</td><td>${b.quoted?'$'+Number(b.quoted).toLocaleString():'—'}</td>
+<td>${b.actual?'$'+Number(b.actual).toLocaleString():'—'}</td><td style="color:${v>0?'var(--red)':v<0?'var(--green)':'inherit'};font-weight:600;">${b.actual?(v>=0?'+':'')+v.toLocaleString():'—'}</td>
+<td>${b.po||''}</td><td>${b.paid==='Yes'?'<span style="color:var(--green);">✓</span>':'—'}</td><td style="font-size:10px;">${b.notes||''}</td></tr>`;});
+h+=`</tbody></table></div></div>`;
+el.innerHTML=h;
+}
+
+// === COMPLIANCE ===
+let compTab='pre';
+function renderComp(el){
+const labels={pre:'Pre-Move Inspections',post:'Post-Move Commissioning',reg:'Regulatory',landlord:'Landlord Make-Good',insurance:'Insurance'};
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">Compliance Checklists</h2>
+<div class="tabs">${Object.keys(labels).map(k=>`<button class="tab ${compTab===k?'act':''}" onclick="compTab='${k}';renderComp(document.getElementById('mainArea'));">${labels[k]}</button>`).join('')}</div>`;
+const items=D.compliance[compTab]||[];
+const done=items.filter(c=>c.done).length;
+h+=`<div class="card"><div class="ch"><h3>${labels[compTab]}</h3><span style="margin-left:auto;font-size:11px;">${done}/${items.length} complete</span></div><div class="cb">
+<table class="dt"><thead><tr><th style="width:30px;">✓</th><th>Item</th><th style="width:110px;">Date</th><th>Notes</th></tr></thead><tbody>`;
+items.forEach((c,i)=>{h+=`<tr style="${c.done?'background:#D5F5E3;':''}"><td><input type="checkbox" ${c.done?'checked':''} onchange="D.compliance['${compTab}'][${i}].done=this.checked;dbSaveComp(D.compliance['${compTab}'][${i}]);renderComp(document.getElementById('mainArea'));"></td>
+<td>${c.item}</td><td><input type="date" value="${c.date||''}" onchange="D.compliance['${compTab}'][${i}].date=this.value;dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100px;padding:2px;font-size:11px;"></td>
+<td><input type="text" value="${c.notes||''}" onchange="D.compliance['${compTab}'][${i}].notes=this.value;dbSaveComp(D.compliance['${compTab}'][${i}]);" style="width:100%;padding:2px;font-size:11px;border:1px solid #ddd;border-radius:3px;"></td></tr>`;});
+h+=`</tbody></table></div></div>`;
+el.innerHTML=h;
+}
+
+// === CHANGE LOG ===
+function renderCL(el){
+let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+<h2 style="font-size:16px;color:var(--navy);">Change Log</h2>
+<button class="btn btn-p" onclick="openNewChange()">+ Log Change</button></div>
+<div class="card"><div class="cb"><table class="dt"><thead><tr><th>ID</th><th>Date</th><th>Description</th><th>By</th><th>Impact</th><th>Approved</th><th>By</th></tr></thead><tbody>`;
+D.changes.forEach(c=>{h+=`<tr><td>CL${c.id}</td><td>${fmt(c.date)}</td><td>${c.desc}</td><td>${c.by}</td><td>${c.impact}</td><td>${c.approved==='Yes'?'<span style="color:var(--green);font-weight:700;">Yes</span>':c.approved}</td><td>${c.approvedBy||''}</td></tr>`;});
+h+=`</tbody></table></div></div>`;
+el.innerHTML=h;
+}
+
+// === TASK MODAL ===
+function openNewTask(){editIdx=-1;document.getElementById('tmTitle').textContent='Add Task';document.getElementById('tmDel').style.display='none';
+document.getElementById('tmBody').innerHTML=taskFormHtml({});openMod('taskMod');}
+function editTask(idx){editIdx=idx;const t=D.tasks[idx];document.getElementById('tmTitle').textContent='Edit Task #'+t.id;document.getElementById('tmDel').style.display='inline-flex';
+document.getElementById('tmBody').innerHTML=taskFormHtml(t);openMod('taskMod');}
+function taskFormHtml(t){
+return`<div class="fr"><div class="fg" style="flex:2"><label>Description</label><input id="tf_d" value="${t.desc||''}"></div>
+<div class="fg" style="flex:1"><label>Work Stream</label><select id="tf_w">${WS.map(w=>`<option value="${w.id}" ${t.ws===w.id?'selected':''}>${w.n}</option>`).join('')}</select></div></div>
+<div class="fr"><div class="fg"><label>Planned Start</label><input type="date" id="tf_ps" value="${t.plannedStart||''}"></div>
+<div class="fg"><label>Planned Finish</label><input type="date" id="tf_pf" value="${t.plannedFinish||''}"></div>
+<div class="fg"><label>Duration (days)</label><input type="number" id="tf_du" value="${t.duration||1}" min="1"></div>
+<div class="fg"><label>Status</label><select id="tf_st"><option ${t.status==='Not Started'?'selected':''}>Not Started</option><option ${t.status==='In Progress'?'selected':''}>In Progress</option><option ${t.status==='Complete'?'selected':''}>Complete</option><option ${t.status==='Blocked'?'selected':''}>Blocked</option><option ${t.status==='On Hold'?'selected':''}>On Hold</option></select></div></div>
+<div class="fr"><div class="fg"><label>Actual Start</label><input type="date" id="tf_as" value="${t.actualStart||''}"></div>
+<div class="fg"><label>Actual Finish</label><input type="date" id="tf_af" value="${t.actualFinish||''}"></div>
+<div class="fg" style="flex:1"><label>Assigned Role</label><select id="tf_ro"><option value="">(none)</option>${ROLES.map(r=>`<option ${t.role===r?'selected':''}>${r}</option>`).join('')}</select></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Assigned Person (override)</label><input id="tf_pe" value="${t.person||''}" placeholder="Leave blank to use role lookup"></div>
+<div class="fg"><label>Predecessors (IDs)</label><input id="tf_pr" value="${t.preds||''}"></div>
+<div class="fg"><label>Critical Path?</label><select id="tf_cr"><option value="0" ${!t.critical?'selected':''}>No</option><option value="1" ${t.critical?'selected':''}>Yes ⚡</option></select></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Notes</label><textarea id="tf_no" rows="2">${t.notes||''}</textarea></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Recovery Plan (if overdue)</label><textarea id="tf_rc" rows="2">${t.recovery||''}</textarea></div></div>`;
+}
+function saveTask(){
+const t={
+id:editIdx>=0?D.tasks[editIdx].id:(D.tasks.length?Math.max(...D.tasks.map(x=>x.id))+1:1),
+ws:document.getElementById('tf_w').value,desc:document.getElementById('tf_d').value,
+plannedStart:document.getElementById('tf_ps').value,plannedFinish:document.getElementById('tf_pf').value,
+duration:+document.getElementById('tf_du').value,status:document.getElementById('tf_st').value,
+actualStart:document.getElementById('tf_as').value,actualFinish:document.getElementById('tf_af').value,
+role:document.getElementById('tf_ro').value,person:document.getElementById('tf_pe').value,
+preds:document.getElementById('tf_pr').value,notes:document.getElementById('tf_no').value,
+critical:document.getElementById('tf_cr').value==='1',recovery:document.getElementById('tf_rc').value
+};
+if(editIdx>=0)D.tasks[editIdx]=t;else D.tasks.push(t);
+dbSaveTask(t).then(()=>dbLog('tasks',t.id,editIdx>=0?'update':'create',''));
+closeMod('taskMod');showPage(document.querySelector('.ni.act')?.dataset.p||'schedule');updBadges();
+}
+function deleteTask(){if(!confirm('Delete this task?'))return;const t=D.tasks[editIdx];dbDeleteTask(t.id).then(()=>dbLog('tasks',t.id,'delete',''));D.tasks.splice(editIdx,1);closeMod('taskMod');showPage('schedule');updBadges();}
+
+// === CONTACT MODAL ===
+function openNewCon(){editConIdx=-1;document.getElementById('conBody').innerHTML=conFormHtml({});openMod('conMod');}
+function editCon(i){editConIdx=i;document.getElementById('conBody').innerHTML=conFormHtml(D.contacts[i]);openMod('conMod');}
+function conFormHtml(c){return`<div class="fr"><div class="fg" style="flex:1"><label>Role</label><input id="cf_r" value="${c.role||''}"></div><div class="fg" style="flex:1"><label>Name</label><input id="cf_n" value="${c.name||''}"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Company</label><input id="cf_co" value="${c.company||''}"></div><div class="fg"><label>Mobile</label><input id="cf_m" value="${c.mobile||''}"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Email</label><input id="cf_e" value="${c.email||''}"></div><div class="fg"><label>Avail (d/wk)</label><input type="number" id="cf_a" value="${c.avail||''}" min="1" max="7"></div><div class="fg"><label>Rate ($/hr)</label><input type="number" id="cf_ra" value="${c.rate||''}"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Notes</label><textarea id="cf_no" rows="2">${c.notes||''}</textarea></div></div>`;}
+function saveCon(){
+const c={role:document.getElementById('cf_r').value,name:document.getElementById('cf_n').value,company:document.getElementById('cf_co').value,
+mobile:document.getElementById('cf_m').value,email:document.getElementById('cf_e').value,avail:document.getElementById('cf_a').value,
+rate:document.getElementById('cf_ra').value,notes:document.getElementById('cf_no').value};
+if(editConIdx>=0){c.id=D.contacts[editConIdx].id;D.contacts[editConIdx]=c;}else D.contacts.push(c);
+dbSaveContact(c).then(()=>dbLog('contacts',c.id||0,'update',''));
+closeMod('conMod');showPage('team');updBadges();
+}
+
+// === DECISION MODAL ===
+function openNewDec(){editDecIdx=-1;document.getElementById('decModTitle').textContent='Add Decision';
+document.getElementById('decModBody').innerHTML=decFormHtml({});openMod('decMod');}
+function editDec(i){editDecIdx=i;document.getElementById('decModTitle').textContent='Edit Decision';
+document.getElementById('decModBody').innerHTML=decFormHtml(D.decisions[i]);openMod('decMod');}
+function decFormHtml(d){return`<div class="fr"><div class="fg" style="flex:1"><label>Title / Question</label><input id="df_t" value="${d.title||''}"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Owner</label><input id="df_o" value="${d.owner||''}"></div><div class="fg"><label>Deadline</label><input type="date" id="df_dl" value="${d.deadline||''}"></div>
+<div class="fg"><label>Status</label><select id="df_st"><option ${d.status==='Open'?'selected':''}>Open</option><option ${d.status==='Resolved'?'selected':''}>Resolved</option></select></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Options / Scenarios</label><input id="df_op" value="${d.options||''}" placeholder="e.g. Move / Sell / Decommission"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Impact if Delayed</label><input id="df_im" value="${d.impact||''}" placeholder="What breaks if this isn't decided?"></div></div>
+<div class="fr"><div class="fg" style="flex:1"><label>Notes / Resolution</label><textarea id="df_no" rows="2">${d.notes||d.resolution||''}</textarea></div></div>`;}
+function saveDec(){
+const d={id:editDecIdx>=0?D.decisions[editDecIdx].id:(D.decisions.length?Math.max(...D.decisions.map(x=>x.id))+1:1),
+title:document.getElementById('df_t').value,owner:document.getElementById('df_o').value,deadline:document.getElementById('df_dl').value,
+status:document.getElementById('df_st').value,options:document.getElementById('df_op').value,impact:document.getElementById('df_im').value,
+notes:document.getElementById('df_no').value,resolution:document.getElementById('df_st').value==='Resolved'?document.getElementById('df_no').value:'',
+resolvedDate:document.getElementById('df_st').value==='Resolved'?today():''};
+if(editDecIdx>=0)D.decisions[editDecIdx]=d;else D.decisions.push(d);
+dbSaveDec(d).then(()=>dbLog('decisions',d.id,'update',''));
+closeMod('decMod');showPage('decisions');updBadges();
+}
+
+// === SIMPLE MODALS FOR RISK/BUDGET/CHANGE ===
+function openNewRisk(){const desc=prompt('Risk description:');if(!desc)return;const cat=prompt('Category (Equipment/Infrastructure/Compliance/Workforce/Financial/Schedule/External):','Schedule');
+const like=+prompt('Likelihood 1-5:','3');const imp=+prompt('Impact 1-5:','3');const mit=prompt('Mitigation:','');const owner=prompt('Owner:','');
+const r={cat:cat||'Schedule',desc,like:like||3,impact:imp||3,mit:mit||'',owner:owner||'',status:'Open'};D.risks.push(r);dbSaveRisk(r);showPage('risks');}
+function openNewBudget(){const desc=prompt('Description:');if(!desc)return;const cat=prompt('Category:','');const est=+prompt('Estimated $:','0');
+const b={cat:cat||'',desc,est,quoted:'',actual:'',po:'',paid:'No',notes:''};D.budget.push(b);dbSaveBudget(b);showPage('budget');}
+function openNewChange(){const desc=prompt('Change description:');if(!desc)return;const by=prompt('Raised by:','');const impact=prompt('Impact (Schedule/Cost/Scope):','Schedule');
+const ch={date:today(),desc,by:by||'',impact:impact||'',approved:'Pending',approvedBy:''};D.changes.push(ch);dbSaveChange(ch);showPage('changelog');}
+
+// === SEED ===
+function seed(){
+let id=0;
+function T(ws,desc,ps,dur,preds,role,status,notes,crit){id++;
+const s=new Date(ps),f=add(s,dur-1);
+D.tasks.push({id,ws,desc,plannedStart:iso(s),plannedFinish:iso(f),duration:dur,actualStart:status==='Complete'?iso(s):(status==='In Progress'?iso(s):''),
+actualFinish:status==='Complete'?iso(f):'',status:status||'Not Started',role:role||'',person:'',preds:preds||'',notes:notes||'',critical:!!crit,recovery:''});}
+
+// STOCK BUILD
+T('stock','DECISION: Agree stock build targets per SKU — operations sign-off','2026-04-07',3,'','Project Manager','Not Started','Gate: defines when each line can go offline',1);
+T('stock','5L Cask stock build — ramp production at St Marys','2026-04-10',28,'1','Site Supervisor (St Marys)','Not Started','Target: TBD pallets. Line A priority.');
+T('stock','10L Cask stock build — continue at St Marys (25% done)','2026-04-10',28,'1','Site Supervisor (St Marys)','In Progress','25% complete per existing planner');
+T('stock','2L Bottle stock build — COMPLETE','2026-04-07',1,'','','Complete','Done per existing planner');
+T('stock','Weekly stock review vs demand — every Monday','2026-04-14',77,'1','Project Manager','Not Started','Recurring: validate buffer is on track');
+
+// SPARE PARTS
+T('spares','Audit ALL spare parts at St Marys — full inventory count','2026-04-07',5,'','Mechanical Fitter','Not Started','Count every part. Photograph. List by equipment.',1);
+T('spares','Identify/design spare parts storage area at EP','2026-04-07',7,'','Site Supervisor (EP)','Not Started','Options: existing space, shipping container, new racking');
+T('spares','DECISION: Spare parts storage solution — approve and order materials','2026-04-14',3,'6,7','Project Manager','Not Started','DECISION REQUIRED — blocks all part moves',1);
+T('spares','Build/install spare parts storage at EP','2026-04-17',10,'8','Mechanical Fitter','Not Started','Must be ready before first line move');
+T('spares','Pack spare parts — label by equipment/line, palletise','2026-04-21',5,'6','Mechanical Fitter','Not Started','');
+T('spares','Transport spare parts to EP','2026-04-28',2,'9,10','Removalist Team Leader','Not Started','');
+T('spares','Unpack, organise, and verify spare parts at EP','2026-04-30',3,'11','Mechanical Fitter','Not Started','Check count matches audit');
+T('spares','Move workshop tools and equipment to EP','2026-05-05',2,'9','Removalist Team Leader','Not Started','');
+
+// UTILITIES & BOILER
+T('utilities','DECISION: Electric boiler — move / sell / decommission in place?','2026-04-07',7,'','Project Manager','Not Started','3 scenarios. Must decide to plan downstream.',1);
+T('utilities','Boiler scenario A: get quotes to relocate to EP','2026-04-14',5,'14','Mechanical Fitter','Not Started','If decision = move');
+T('utilities','Boiler scenario B: get valuation / buyer for sale','2026-04-14',5,'14','Project Manager','Not Started','If decision = sell');
+T('utilities','Boiler scenario C: plan decommission in place (make good scope)','2026-04-14',5,'14','Licensed Electrician','Not Started','If decision = decommission');
+T('utilities','Execute boiler decision — whichever path approved','2026-05-01',14,'15,16,17','Project Manager','Not Started','');
+T('utilities','Compressed air: assess EP capacity vs St Marys needs','2026-04-14',3,'','Mechanical Fitter','Not Started','Can EP compressor handle relocated lines?');
+T('utilities','Disconnect compressed air reticulation at St Marys','2026-06-01',2,'19','Mechanical Fitter','Not Started','After all production lines moved');
+T('utilities','Relocate pallet wrapper to EP','2026-06-01',1,'','Removalist Team Leader','Not Started','');
+T('utilities','Relocate in-line testing equipment to EP','2026-05-25',2,'','QA Manager','Not Started','');
+
+// CASK LINE A — bolt-level detail
+T('caska','GATE: Confirm Line A stock build complete — sign-off to disconnect','2026-05-04',1,'2','Project Manager','Not Started','No disconnect without written sign-off',1);
+T('caska','Pre-move condition report: Scholle Filler A — photograph, record serial numbers','2026-05-04',1,'23','Mechanical Fitter','Not Started','Insurance requirement');
+T('caska','Pre-move condition report: RecoPak A, HMPS A, conveyors','2026-05-04',1,'23','Mechanical Fitter','Not Started','');
+T('caska','Isolate Line A — lock out/tag out electrical, water, air, gas','2026-05-05',1,'23,24,25','Licensed Electrician','Not Started','LOTO procedure. Cert required.',1);
+T('caska','Drain all Line A water-contact equipment. Seal open ports.','2026-05-05',1,'26','Licensed Plumber','Not Started','Contamination prevention');
+T('caska','Disconnect Scholle Filler A — SIG engineer on site','2026-05-06',3,'27','Scholle/SIG Engineer','Not Started','SIG must be booked 2+ weeks ahead',1);
+T('caska','Disconnect RecoPak A carton erector','2026-05-06',2,'26','Mechanical Fitter','Not Started','Label all cable looms and pneumatic lines');
+T('caska','Disconnect HMPS cask erector A','2026-05-06',2,'26','HMPS Technician','Not Started','');
+T('caska','Disconnect Line A conveyors — label every connection point','2026-05-08',2,'26','Mechanical Fitter','Not Started','Photograph before disconnecting');
+T('caska','Disconnect Line A palletiser','2026-05-08',1,'26','Mechanical Fitter','Not Started','');
+T('caska','Disconnect Line A shrink tunnel','2026-05-08',1,'26','Mechanical Fitter','Not Started','');
+T('caska','Dismantle Line A pipework — label every joint, bag fixings','2026-05-08',3,'27','Licensed Plumber','Not Started','Every pipe labelled with from→to');
+T('caska','Disconnect Line A electrical — isolate at board, remove cabling','2026-05-08',2,'26','Licensed Electrician','Not Started','Certificate of disconnection required');
+T('caska','Rigger: prepare Filler A for lift — skid, brace, protect','2026-05-11',1,'28,29,30','Rigger/Crane Operator','Not Started','');
+T('caska','CRANE DAY 1: Lift Filler A, RecoPak A, HMPS A onto transport','2026-05-12',1,'36','Rigger/Crane Operator','Not Started','Crane booked? Permit? Access confirmed?',1);
+T('caska','CRANE DAY 2: Lift conveyors, palletiser, shrink tunnel onto transport','2026-05-13',1,'37','Rigger/Crane Operator','Not Started','');
+T('caska','Transport Line A equipment St Marys → EP','2026-05-14',2,'37,38','Removalist Team Leader','Not Started','Transit insurance confirmed? Route surveyed?',1);
+T('caska','EP READINESS CHECK: confirm Line A floor position marked, services ready','2026-05-14',1,'','Site Supervisor (EP)','Not Started','Must pass before equipment arrives');
+T('caska','CRANE EP: Offload and position Scholle Filler A per floor plan','2026-05-16',1,'39,40','Rigger/Crane Operator','Not Started','',1);
+T('caska','Position RecoPak A and HMPS cask erector A at EP','2026-05-16',1,'39','Rigger/Crane Operator','Not Started','');
+T('caska','Position Line A conveyors, palletiser, shrink tunnel at EP','2026-05-17',2,'39','Mechanical Fitter','Not Started','');
+T('caska','Reconnect Line A pipework at EP — plumber','2026-05-19',4,'41,42,43','Licensed Plumber','Not Started','Cert of compliance required',1);
+T('caska','Reconnect Line A electrical at EP — electrician','2026-05-19',3,'41,42,43','Licensed Electrician','Not Started','Cert of compliance required',1);
+T('caska','Reconnect Line A pneumatics and compressed air','2026-05-19',2,'41,42,43','Mechanical Fitter','Not Started','');
+T('caska','Commission Scholle Filler A — SIG engineer on site','2026-05-23',3,'44,45,46','Scholle/SIG Engineer','Not Started','SIG MUST be booked',1);
+T('caska','Commission RecoPak A and HMPS A','2026-05-23',2,'44,45','HMPS Technician','Not Started','');
+T('caska','Line A CIP — full clean-in-place before test run','2026-05-26',1,'47,48','QA Manager','Not Started','');
+T('caska','Line A test runs — minimum 2 runs, record output','2026-05-27',2,'49','Site Supervisor (EP)','Not Started','',1);
+T('caska','Line A micro sampling — send to lab','2026-05-29',1,'50','QA Manager','Not Started','',1);
+T('caska','Line A micro results — 5 BUSINESS DAYS wait','2026-05-30',7,'51','QA Manager','Not Started','NO production until results clear',1);
+T('caska','GATE: Line A production release at EP','2026-06-06',1,'52','Project Manager','Not Started','Sign-off: micro pass + QA approval',1);
+
+// CASK LINE B
+T('caskb','GATE: Line A operational at EP before Line B disconnected','2026-06-06',1,'53','Project Manager','Not Started','Cannot lose both cask lines',1);
+T('caskb','Pre-move condition reports: Filler B, RecoPak B, HMPS B, conveyors','2026-06-06',1,'54','Mechanical Fitter','Not Started','');
+T('caskb','Isolate Line B — LOTO all services','2026-06-07',1,'55','Licensed Electrician','Not Started','',1);
+T('caskb','Drain and seal Line B water-contact equipment','2026-06-07',1,'56','Licensed Plumber','Not Started','');
+T('caskb','Disconnect Scholle Filler B — SIG engineer','2026-06-08',3,'57','Scholle/SIG Engineer','Not Started','',1);
+T('caskb','Disconnect RecoPak B, HMPS B, conveyors, ancillary','2026-06-08',2,'56','Mechanical Fitter','Not Started','');
+T('caskb','Dismantle Line B pipework — label everything','2026-06-08',2,'56','Licensed Plumber','Not Started','');
+T('caskb','Disconnect Line B electrical — cert','2026-06-08',2,'56','Licensed Electrician','Not Started','');
+T('caskb','Rigger: prep and load Line B equipment','2026-06-11',2,'58,59,60,61','Rigger/Crane Operator','Not Started','',1);
+T('caskb','Transport Line B St Marys → EP','2026-06-13',2,'62','Removalist Team Leader','Not Started','',1);
+T('caskb','Position all Line B equipment at EP','2026-06-15',2,'63','Rigger/Crane Operator','Not Started','');
+T('caskb','Reconnect Line B — pipework, electrical, pneumatics','2026-06-17',5,'64','Licensed Plumber','Not Started','',1);
+T('caskb','Commission Filler B, RecoPak B, HMPS B at EP','2026-06-22',3,'65','Scholle/SIG Engineer','Not Started','',1);
+T('caskb','Line B CIP + test runs','2026-06-25',2,'66','Site Supervisor (EP)','Not Started','');
+T('caskb','Line B micro sample → results (5 bus days)','2026-06-27',5,'67','QA Manager','Not Started','Results may fall after exit date — flag risk');
+
+// BOTTLE LINE
+T('bottle','Pre-move condition report: rinser, filler, labeller, overpacker, conveyors','2026-05-10',1,'','Bottle Line Technician','Not Started','');
+T('bottle','Isolate 2L bottle line — LOTO','2026-05-11',1,'4,69','Licensed Electrician','Not Started','Can proceed independently of cask');
+T('bottle','Drain and seal bottle line water-contact parts','2026-05-11',1,'70','Licensed Plumber','Not Started','');
+T('bottle','Disconnect rinser, filler, labeller, overpacker','2026-05-12',3,'71','Bottle Line Technician','Not Started','');
+T('bottle','Disconnect bottle line conveyors and accumulation tables','2026-05-12',2,'70','Mechanical Fitter','Not Started','');
+T('bottle','Disconnect bottle line pipework — label all','2026-05-14',2,'70','Licensed Plumber','Not Started','');
+T('bottle','Disconnect bottle line electrical — cert','2026-05-14',2,'70','Licensed Electrician','Not Started','');
+T('bottle','Load and transport bottle line to EP','2026-05-16',2,'72,73,74,75','Removalist Team Leader','Not Started','',1);
+T('bottle','Position bottle line equipment at EP','2026-05-18',2,'76','Rigger/Crane Operator','Not Started','');
+T('bottle','Reconnect bottle line — plumbing, electrical, pneumatics','2026-05-20',4,'77','Licensed Plumber','Not Started','',1);
+T('bottle','Commission bottle line at EP','2026-05-24',3,'78','Bottle Line Technician','Not Started','');
+T('bottle','Bottle line CIP + test runs','2026-05-27',2,'79','Site Supervisor (EP)','Not Started','');
+T('bottle','Bottle line micro sample → results (5 bus days)','2026-05-29',7,'80','QA Manager','Not Started','',1);
+T('bottle','GATE: Bottle line production release at EP','2026-06-05',1,'81','Project Manager','Not Started','',1);
+
+// WATER TREATMENT / RO
+T('water','DECISION: Veolia moves the RO or we engage separate riggers?','2026-04-07',5,'','Project Manager','Not Started','Affects cost, risk, schedule',1);
+T('water','Pre-move condition report: RO unit, pre-filtration, all tanks','2026-06-06',1,'','RO/Water Treatment Tech (Veolia)','Not Started','');
+T('water','RO 2 — isolate and drain at St Marys','2026-06-08',2,'53,82','RO/Water Treatment Tech (Veolia)','Not Started','After all lines moved from St Marys',1);
+T('water','Disconnect pre-filtration (carbon beds, sand beds, cartridge filters)','2026-06-08',2,'85','Licensed Plumber','Not Started','');
+T('water','Disconnect and drain storage tanks','2026-06-10',2,'85','Mechanical Fitter','Not Started','');
+T('water','Transport RO, pre-filtration, tanks to EP — heavy lift','2026-06-12',3,'86,87','Rigger/Crane Operator','Not Started','Crane required. Last major move.',1);
+T('water','Install RO 2 at EP — connect to water supply','2026-06-15',5,'88','RO/Water Treatment Tech (Veolia)','Not Started','',1);
+T('water','Install pre-filtration at EP','2026-06-15',3,'88','Licensed Plumber','Not Started','');
+T('water','Install and connect storage tanks at EP','2026-06-15',3,'88','Mechanical Fitter','Not Started','');
+T('water','Commission entire water treatment system','2026-06-20',3,'89,90,91','RO/Water Treatment Tech (Veolia)','Not Started','',1);
+T('water','Water quality testing — micro samples','2026-06-23',5,'92','QA Manager','Not Started','',1);
+
+// QA
+T('qa','Update food safety plan for EP site','2026-04-14',10,'','QA Manager','Not Started','');
+T('qa','Notify council/regulatory of production site change','2026-04-14',5,'','Project Manager','Not Started','');
+T('qa','Update product labelling with new EP address','2026-04-21',14,'','QA Manager','Not Started','Label print lead time');
+T('qa','Establish CCPs at EP — all lines','2026-05-22',10,'','QA Manager','Not Started','');
+T('qa','Install temperature monitoring (Tiny Tags) at EP','2026-05-20',3,'','QA Manager','Not Started','');
+
+// OFFICE & IT
+T('office','DECISION: Server physical move vs cloud migration','2026-04-07',7,'','IT/Comms Technician','Not Started','',1);
+T('office','Execute server/cloud decision','2026-04-14',14,'99','IT/Comms Technician','Not Started','');
+T('office','Pack and transport office furniture and files','2026-06-08',2,'','Removalist Team Leader','Not Started','');
+T('office','Server and phone system cutover — schedule Fri→Sun','2026-06-12',3,'100','IT/Comms Technician','Not Started','');
+T('office','Update utility providers with new address','2026-06-01',5,'','Project Manager','Not Started','');
+T('office','Update ALL suppliers with new delivery address','2026-06-01',5,'','Project Manager','Not Started','');
+T('office','Move time and attendance scanner','2026-06-12',1,'','IT/Comms Technician','Not Started','');
+T('office','Update statutory bodies (ATO, ASIC, etc.)','2026-06-01',7,'','Project Manager','Not Started','');
+
+// DECOMMISSION & MAKE GOOD
+T('decom','DECISION: Agree make-good scope with St Marys landlord — IN WRITING','2026-04-07',14,'','Project Manager','Not Started','Must have written agreement before spending',1);
+T('decom','Hazmat/asbestos pre-inspection — St Marys shed','2026-04-14',5,'','Site Supervisor (St Marys)','Not Started','Risk R20: unexpected hazmat');
+T('decom','Dismantle and remove ALL racking','2026-06-15',3,'','Removalist Team Leader','Not Started','');
+T('decom','Remove ALL signage — internal and external','2026-06-18',2,'109','Signage Contractor','Not Started','');
+T('decom','Cap all services: electrical — cert of disconnection','2026-06-18',2,'','Licensed Electrician','Not Started','');
+T('decom','Cap all services: water/plumbing — cert','2026-06-18',2,'','Licensed Plumber','Not Started','');
+T('decom','Cap all services: gas — cert','2026-06-18',1,'','Licensed Plumber','Not Started','');
+T('decom','Cap compressed air','2026-06-19',1,'','Mechanical Fitter','Not Started','');
+T('decom','Floor repair: patch holes, clean, epoxy if per scope','2026-06-20',4,'109,111,112,113','Cleaning Contractor','Not Started','');
+T('decom','Wall repair if per scope','2026-06-20',2,'','Cleaning Contractor','Not Started','');
+T('decom','Deep clean entire facility','2026-06-24',2,'115,116','Cleaning Contractor','Not Started','');
+T('decom','Waste removal — skip bins, dispose of all refuse','2026-06-24',2,'','Waste Removal','Not Started','');
+T('decom','FINAL LANDLORD INSPECTION — must pass','2026-06-27',1,'117,118','Project Manager','Not Started','',1);
+T('decom','Lease exit documentation signed. Keys returned.','2026-06-28',1,'119','Project Manager','Not Started','HARD DEADLINE: before 30/06/2026',1);
+
+// Decisions
+D.decisions=[
+{id:1,title:'Electric boiler: move to EP, sell, or decommission in place?',owner:'Rob / Richard',deadline:'2026-04-14',status:'Open',options:'Move / Sell / Decommission',impact:'Blocks utilities workstream. Affects make-good scope.',notes:''},
+{id:2,title:'Spare parts storage location at EP — no space identified yet',owner:'Jeremy / Caine',deadline:'2026-04-21',status:'Open',options:'Build racking / Shipping container / Existing space',impact:'Parts exposed or lost. Maintenance at EP compromised.',notes:''},
+{id:3,title:'Sequence: move Line A first or Line B first?',owner:'Jeremy',deadline:'2026-04-14',status:'Open',options:'A first (current plan) / B first',impact:'Defines entire schedule sequence.',notes:''},
+{id:4,title:'Stock build targets per SKU before each line goes offline',owner:'Operations',deadline:'2026-04-10',status:'Open',options:'',impact:'Cannot disconnect any line without knowing buffer is sufficient.',notes:''},
+{id:5,title:'Make-good scope with St Marys landlord — MUST BE IN WRITING',owner:'Rob',deadline:'2026-04-21',status:'Open',options:'',impact:'Cost blowout risk. Dispute risk. Lease exit blocked.',notes:''},
+{id:6,title:'Veolia RO: do they move it, or do we engage riggers separately?',owner:'Richard',deadline:'2026-04-14',status:'Open',options:'Veolia moves / ABH arranges rigger',impact:'Affects cost, insurance, risk of damage, warranty.',notes:''},
+{id:7,title:'SIG/Scholle: service contract for decommission + recommission both fillers',owner:'Jeremy',deadline:'2026-04-21',status:'Open',options:'',impact:'Cannot decommission or commission fillers without SIG. 2-week booking lead time.',notes:''},
+{id:8,title:'Transit insurance: confirm policy covers all equipment in transit',owner:'Rob / Adam',deadline:'2026-05-01',status:'Open',options:'',impact:'Uninsured transit = full financial risk on any damage.',notes:''},
+{id:9,title:'IT: physical server move to EP vs migrate to cloud',owner:'Adam',deadline:'2026-04-21',status:'Open',options:'Physical move / Cloud migration / Hybrid',impact:'Affects downtime window, cost, ongoing IT architecture.',notes:''},
+{id:10,title:'EP shed readiness: confirm ALL infrastructure prerequisites before any line arrives',owner:'Caine / Richard',deadline:'2026-04-28',status:'Open',options:'',impact:'Equipment arrives to a shed that is not ready = delay + double handling.',notes:''},
+];
+
+// Stock
+D.stock=[
+{sku:'5L Cask',current:'',demand:'',buffer:'',bufferWks:4,status:'Not Started',lastSM:'',firstEP:'',notes:'Line A priority'},
+{sku:'10L Cask',current:'',demand:'',buffer:'',bufferWks:4,status:'In Progress',lastSM:'',firstEP:'',notes:'25% complete'},
+{sku:'2L Bottle',current:'',demand:'',buffer:'',bufferWks:2,status:'Complete',lastSM:'Complete',firstEP:'',notes:'Done'},
+];
+
+// Risks (20)
+D.risks=[
+{id:1,cat:'Schedule',desc:'Electric boiler decision delay blocks utilities workstream',like:4,impact:3,mit:'Escalate to Rob by 14/04',owner:'Rob',status:'Open'},
+{id:2,cat:'Infrastructure',desc:'No spare parts storage at EP — parts lost/damaged during move',like:4,impact:4,mit:'Temporary container as fallback',owner:'Jeremy',status:'Open'},
+{id:3,cat:'Equipment',desc:'Veolia RO damaged during transport',like:2,impact:5,mit:'Specialist removalist + transit insurance',owner:'Richard',status:'Open'},
+{id:4,cat:'Equipment',desc:'Scholle filler fails to recommission after move',like:3,impact:5,mit:'SIG engineer on site for commissioning. Spare parts on hand.',owner:'Jeremy',status:'Open'},
+{id:5,cat:'Infrastructure',desc:'EP pipework incompatible with relocated equipment',like:3,impact:4,mit:'Pre-survey all pipe sizes and connections',owner:'Caine',status:'Open'},
+{id:6,cat:'Compliance',desc:'Council/regulatory approvals delayed',like:3,impact:4,mit:'Submit early. Weekly follow-up.',owner:'Rob',status:'Open'},
+{id:7,cat:'Workforce',desc:'Key contractor unavailable during critical window',like:3,impact:4,mit:'Book now with deposit. Identify backup.',owner:'PM',status:'Open'},
+{id:8,cat:'Schedule',desc:'Water supply interruption during RO recommission',like:3,impact:5,mit:'RO 1 operational at EP as backup',owner:'Jeremy',status:'Open'},
+{id:9,cat:'Schedule',desc:'Production gap exceeds buffer stock — customer impact',like:3,impact:5,mit:'Conservative targets. Weekly stock review.',owner:'Ops',status:'Open'},
+{id:10,cat:'Financial',desc:'Landlord dispute on make-good scope',like:3,impact:3,mit:'Written scope agreement before work starts',owner:'Rob',status:'Open'},
+{id:11,cat:'External',desc:'Weather delays on crane / heavy lift days',like:2,impact:3,mit:'2-day buffer around crane bookings',owner:'Site Super',status:'Open'},
+{id:12,cat:'Infrastructure',desc:'EP shed not ready when equipment arrives',like:2,impact:5,mit:'EP readiness checklist 1 week before each move',owner:'Caine',status:'Open'},
+{id:13,cat:'Compliance',desc:'Micro testing failure post-commissioning',like:2,impact:4,mit:'Full CIP before test. Contingency for re-test.',owner:'QA',status:'Open'},
+{id:14,cat:'Financial',desc:'Insurance coverage gap during transit',like:2,impact:4,mit:'Confirm transit policy before first move',owner:'Rob',status:'Open'},
+{id:15,cat:'Workforce',desc:'Staff skill gaps on equipment at EP',like:3,impact:3,mit:'Training parallel to commissioning',owner:'Jeremy',status:'Open'},
+{id:16,cat:'Equipment',desc:'Contamination during disassembly of water-contact equipment',like:2,impact:4,mit:'Seal all ports. Sanitise before reconnect.',owner:'QA',status:'Open'},
+{id:17,cat:'External',desc:'Crane/forklift access constraints at either site',like:2,impact:3,mit:'Site survey for access paths before booking',owner:'Site Super',status:'Open'},
+{id:18,cat:'Schedule',desc:'IT/server downtime exceeds planned window',like:3,impact:3,mit:'Weekend cutover. Cloud backup of critical data.',owner:'Adam',status:'Open'},
+{id:19,cat:'Financial',desc:'Lease exit penalty if 30 June missed',like:2,impact:5,mit:'Weekly schedule review. Escalate at -30 days.',owner:'Rob',status:'Open'},
+{id:20,cat:'Compliance',desc:'Unexpected asbestos/hazmat in St Marys shed',like:1,impact:5,mit:'Pre-inspection before major works',owner:'Site Super',status:'Open'},
+];
+
+// Budget
+D.budget=[
+{cat:'Removalists',desc:'Equipment transport — all lines + ancillary',est:25000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Electricians',desc:'Disconnect + reconnect all lines + certs',est:35000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Plumbers',desc:'Pipework disconnect + reconnect + certs',est:30000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Mechanical Fitters',desc:'Dismantle + reassemble all lines',est:20000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Rigging/Crane',desc:'Heavy lifts — fillers, RO, tanks (multiple days)',est:18000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'RO Technicians',desc:'Veolia — decommission + recommission RO',est:12000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Scholle/SIG',desc:'Filler decommission + commission ×2 lines',est:20000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Make Good',desc:'St Marys floors, walls, services, clean',est:25000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Cleaning',desc:'Final deep clean St Marys',est:5000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'IT/Comms',desc:'Server/phone move or cloud migration',est:8000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Insurance',desc:'Transit insurance all equipment',est:5000,quoted:'',actual:'',po:'',paid:'No',notes:''},
+{cat:'Contingency',desc:'10% contingency on above',est:20300,quoted:'',actual:'',po:'',paid:'No',notes:''},
+];
+
+D.changes=[{id:1,date:'2026-04-07',desc:'Initial baseline plan created',by:'Rob',impact:'Scope',approved:'Yes',approvedBy:'Rob'}];
+
+D.compliance={
+pre:[
+{item:'Scholle Filler A — condition report + photos + serial numbers',done:false,date:'',notes:''},
+{item:'Scholle Filler B — condition report + photos + serial numbers',done:false,date:'',notes:''},
+{item:'RecoPak A — condition report + photos',done:false,date:'',notes:''},
+{item:'RecoPak B — condition report + photos',done:false,date:'',notes:''},
+{item:'HMPS Cask Erector A — condition report',done:false,date:'',notes:''},
+{item:'HMPS Cask Erector B — condition report',done:false,date:'',notes:''},
+{item:'2L Bottle line (rinser/filler/labeller/overpacker) — condition report',done:false,date:'',notes:''},
+{item:'Veolia RO unit — condition report',done:false,date:'',notes:''},
+{item:'Pre-filtration (carbon/sand/cartridge) — condition report',done:false,date:'',notes:''},
+{item:'All storage tanks — condition and cleanliness report',done:false,date:'',notes:''},
+{item:'Electric boiler — condition report',done:false,date:'',notes:''},
+{item:'Compressor — condition report',done:false,date:'',notes:''},
+{item:'All conveyors — condition report per line',done:false,date:'',notes:''},
+{item:'Palletiser — condition report',done:false,date:'',notes:''},
+{item:'Shrink tunnel — condition report',done:false,date:'',notes:''},
+],
+post:[
+{item:'Line A CIP complete',done:false,date:'',notes:''},{item:'Line A Scholle filler commissioned — SIG sign-off document',done:false,date:'',notes:''},
+{item:'Line A RecoPak commissioned',done:false,date:'',notes:''},{item:'Line A HMPS commissioned',done:false,date:'',notes:''},
+{item:'Line A test run passed — output recorded',done:false,date:'',notes:''},{item:'Line A micro results CLEAR',done:false,date:'',notes:''},
+{item:'Line B CIP complete',done:false,date:'',notes:''},{item:'Line B Scholle filler commissioned — SIG sign-off',done:false,date:'',notes:''},
+{item:'Line B test run passed',done:false,date:'',notes:''},{item:'Line B micro results CLEAR',done:false,date:'',notes:''},
+{item:'Bottle line commissioned',done:false,date:'',notes:''},{item:'Bottle line micro results CLEAR',done:false,date:'',notes:''},
+{item:'RO 2 commissioned — water quality tested',done:false,date:'',notes:''},{item:'All CCPs verified at EP',done:false,date:'',notes:''},
+],
+reg:[
+{item:'Food safety plan updated for EP',done:false,date:'',notes:''},{item:'Council notified of site change',done:false,date:'',notes:''},
+{item:'Product labels updated with EP address',done:false,date:'',notes:''},{item:'CCPs established at EP',done:false,date:'',notes:''},
+{item:'Temperature monitoring installed and verified',done:false,date:'',notes:''},
+],
+landlord:[
+{item:'Written make-good scope agreed with landlord',done:false,date:'',notes:''},{item:'All racking removed',done:false,date:'',notes:''},
+{item:'All signage removed',done:false,date:'',notes:''},{item:'Electrical services capped — cert obtained',done:false,date:'',notes:''},
+{item:'Plumbing services capped — cert obtained',done:false,date:'',notes:''},{item:'Gas services capped — cert obtained',done:false,date:'',notes:''},
+{item:'Floors repaired per scope',done:false,date:'',notes:''},{item:'Walls repaired per scope',done:false,date:'',notes:''},
+{item:'Deep clean complete',done:false,date:'',notes:''},{item:'Waste removed — site clear',done:false,date:'',notes:''},
+{item:'Final landlord inspection PASSED',done:false,date:'',notes:''},{item:'Keys returned. Lease exit document signed.',done:false,date:'',notes:''},
+],
+insurance:[
+{item:'Transit insurance policy confirmed — covers ALL equipment',done:false,date:'',notes:''},{item:'Equipment valuation completed for transit cover',done:false,date:'',notes:''},
+{item:'Public liability confirmed for ALL contractors on site',done:false,date:'',notes:''},{item:'Crane operator insurance/cert verified',done:false,date:'',notes:''},
+],
+};
+
+D.contacts=ROLES.map(r=>({role:r,name:'',company:'',mobile:'',email:'',avail:'',rate:'',notes:''}));
+}
+
+// Seed to Supabase
+async function seedDb(){
+  seed(); // populate D in memory
+  try{
+    // Write all tasks
+    const taskRows=D.tasks.map(taskToDb);
+    await sb.from('tasks').upsert(taskRows,{onConflict:'id'});
+    // Write contacts
+    const conRows=D.contacts.map(contactToDb);
+    await sb.from('contacts').insert(conRows);
+    // Write decisions
+    const decRows=D.decisions.map(decToDb);
+    await sb.from('decisions').upsert(decRows,{onConflict:'id'});
+    // Write risks
+    const riskRows=D.risks.map(riskToDb);
+    await sb.from('risks').insert(riskRows);
+    // Write budget
+    const budgetRows=D.budget.map(budgetToDb);
+    await sb.from('budget_items').insert(budgetRows);
+    // Write stock
+    const stockRows=D.stock.map(stockToDb);
+    await sb.from('stock_build').insert(stockRows);
+    // Write compliance
+    let sortOrd=0;
+    const compRows=[];
+    for(const sec of ['pre','post','reg','landlord','insurance']){
+      (D.compliance[sec]||[]).forEach((c,i)=>{compRows.push({...compToDb(c,sec),sort_order:sortOrd++});});
+    }
+    await sb.from('compliance_items').insert(compRows);
+    // Write change log
+    const clRows=D.changes.map(changeToDb);
+    await sb.from('change_log').insert(clRows);
+    // Activity log
+    await dbLog('system',0,'seed','Initial database seed');
+    toast('Database seeded with 120-day plan');
+  }catch(err){
+    console.error('Seed failed:',err);
+    toast('Seed failed — check console');
+  }
+}
+
+// === INIT ===
+(async function init(){
+  document.getElementById('mainArea').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:60vh;"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:8px;">⏳</div><div style="font-size:14px;color:var(--muted);">Loading from database...</div></div></div>';
+  await loadAll();
+  updBadges();
+  renderDash(document.getElementById('mainArea'));
+})();
+// No auto-save interval — each edit writes to DB individually
+</script>
+</body>
+</html>
+
