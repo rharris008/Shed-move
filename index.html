@@ -110,7 +110,7 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 <body>
 <header class="hdr">
 <div class="logo"><span>abh</span></div><div class="sep">|</div><div class="ttl">St Marys → Erskine Park Relocation Command Centre</div>
-<div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn" onclick="exportJSON()">📥 Export</button><button class="hbtn" onclick="importJSON()">📤 Import</button></div>
+<div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn" onclick="exportJSON()">📥 Backup</button><button class="hbtn" onclick="importJSON()">📤 Restore</button></div>
 </header>
 <!-- SAVE BAR — fixed below header -->
 <div id="saveBar" style="position:fixed;top:var(--header);left:0;right:0;height:36px;background:#E8F5E9;border-bottom:1px solid #C8E6C9;display:flex;align-items:center;justify-content:center;gap:12px;z-index:99;transition:background .3s;">
@@ -128,7 +128,6 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 <div class="sec">Planning</div>
 <div class="ni" data-p="schedule"><span class="ic">📋</span>Master Schedule</div>
 <div class="ni" data-p="critical"><span class="ic">⚡</span>Critical Path<span class="bg" id="critBg">0</span></div>
-<div class="ni" data-p="decisions"><span class="ic">🔴</span>Decisions<span class="bg" id="decBg">0</span></div>
 <div class="sec">Resources</div>
 <div class="ni" data-p="team"><span class="ic">👥</span>Team & Contacts</div>
 <div class="ni" data-p="unalloc"><span class="ic">⚠️</span>Unallocated<span class="bg" id="unaBg">0</span></div>
@@ -169,6 +168,7 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 </div></div>
 
 <input type="file" id="fileImport" accept=".json" style="display:none" onchange="doImport(event)">
+<input type="file" id="csvImport" accept=".csv,.xlsx,.xls" style="display:none" onchange="doCSVImport(event)">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -312,6 +312,153 @@ async function saveAll(){
 }
 
 function exportJSON(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='ABH_Relocation_'+iso(new Date())+'.json';a.click();URL.revokeObjectURL(u);}
+
+function exportCurrentCSV(){
+// Get the current filtered/sorted task list
+const fws=document.getElementById('sFws')?.value||'';
+const fst=document.getElementById('sFst')?.value||'';
+const fper=document.getElementById('sFper')?.value||'';
+const fq=(document.getElementById('sFq')?.value||'').toLowerCase();
+const fcrit=document.getElementById('sFcrit')?.checked||false;
+const sortBy=document.getElementById('sFsort')?.value||'date';
+
+let tasks=D.tasks.slice();
+if(fws)tasks=tasks.filter(t=>t.ws===fws);
+if(fst==='Overdue')tasks=tasks.filter(t=>effSt(t)==='Overdue');
+else if(fst)tasks=tasks.filter(t=>t.status===fst);
+if(fper)tasks=tasks.filter(t=>getPerson(t)===fper||t.consulted===fper);
+if(fq)tasks=tasks.filter(t=>t.desc.toLowerCase().includes(fq)||(t.notes||'').toLowerCase().includes(fq));
+if(fcrit)tasks=tasks.filter(t=>t.critical);
+
+const statusOrder={'Blocked':0,'Overdue':1,'In Progress':2,'Not Started':3,'On Hold':4,'Complete':5};
+if(sortBy==='date')tasks.sort((a,b)=>(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999')||(a.id-b.id));
+else if(sortBy==='stream')tasks.sort((a,b)=>wsN(a.ws).localeCompare(wsN(b.ws))||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999'));
+else if(sortBy==='responsible')tasks.sort((a,b)=>{const pa=getPerson(a)||'zzz';const pb=getPerson(b)||'zzz';return pa.localeCompare(pb)||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999');});
+else if(sortBy==='status')tasks.sort((a,b)=>{const sa=statusOrder[effSt(a)]??3;const sb=statusOrder[effSt(b)]??3;return sa-sb||(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999');});
+
+const csvEsc=(v)=>'"'+(v||'').replace(/"/g,'""')+'"';
+const headers=['ID','Work Stream','Task','Responsible','Consulted','Planned Start','Planned Finish','Duration (days)','Status','Critical','Dependencies','Notes','Recovery Plan'];
+let csv=headers.join(',')+'\n';
+tasks.forEach(t=>{
+csv+=[t.id,csvEsc(wsN(t.ws)),csvEsc(t.desc),csvEsc(getPerson(t)),csvEsc(t.consulted),t.plannedStart||'',t.plannedFinish||'',t.duration,csvEsc(effSt(t)),t.critical?'Yes':'No',csvEsc(t.preds),csvEsc(t.notes),csvEsc(t.recovery)].join(',')+'\n';
+});
+
+const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;a.download='ABH_Schedule_'+iso(new Date())+'.csv';a.click();
+URL.revokeObjectURL(url);
+toast('CSV exported — '+tasks.length+' tasks');
+}
+
+function importCSV(){document.getElementById('csvImport').click();}
+async function doCSVImport(e){
+const f=e.target.files[0];if(!f)return;
+const text=await f.text();
+const lines=text.split('\n').filter(l=>l.trim());
+if(lines.length<2){alert('CSV is empty or has no data rows.');return;}
+
+// Parse header
+const header=parseCSVLine(lines[0]);
+const colMap={};
+header.forEach((h,i)=>{
+const lc=h.toLowerCase().trim().replace(/['"]/g,'');
+if(lc==='id')colMap.id=i;
+else if(lc.includes('work stream')||lc==='stream')colMap.ws=i;
+else if(lc==='task'||lc==='description')colMap.desc=i;
+else if(lc==='responsible')colMap.person=i;
+else if(lc==='consulted')colMap.consulted=i;
+else if(lc.includes('planned start')||lc==='start')colMap.plannedStart=i;
+else if(lc.includes('planned finish')||lc==='finish')colMap.plannedFinish=i;
+else if(lc.includes('duration'))colMap.duration=i;
+else if(lc==='status')colMap.status=i;
+else if(lc==='critical')colMap.critical=i;
+else if(lc.includes('depend')||lc==='deps'||lc==='dependencies')colMap.preds=i;
+else if(lc==='notes')colMap.notes=i;
+else if(lc.includes('recovery'))colMap.recovery=i;
+});
+
+if(colMap.desc===undefined){alert('Cannot find a "Task" or "Description" column in the CSV header.');return;}
+
+let updated=0,added=0;
+for(let i=1;i<lines.length;i++){
+const vals=parseCSVLine(lines[i]);
+if(!vals.length||!vals[colMap.desc]?.trim())continue;
+
+const csvId=colMap.id!==undefined?parseInt(vals[colMap.id]):0;
+const desc=(vals[colMap.desc]||'').trim();
+const wsName=(colMap.ws!==undefined?vals[colMap.ws]:'').trim();
+const wsObj=WS.find(w=>w.n.toLowerCase()===wsName.toLowerCase())||WS.find(w=>w.id===wsName.toLowerCase());
+
+// Try to match to existing task by ID
+let existing=csvId?D.tasks.find(t=>t.id===csvId):null;
+
+if(existing){
+// Update existing task
+if(colMap.desc!==undefined)existing.desc=desc;
+if(colMap.person!==undefined)existing.person=(vals[colMap.person]||'').trim();
+if(colMap.consulted!==undefined)existing.consulted=(vals[colMap.consulted]||'').trim();
+if(colMap.plannedStart!==undefined&&vals[colMap.plannedStart])existing.plannedStart=parseCSVDate(vals[colMap.plannedStart]);
+if(colMap.plannedFinish!==undefined&&vals[colMap.plannedFinish])existing.plannedFinish=parseCSVDate(vals[colMap.plannedFinish]);
+if(colMap.duration!==undefined&&vals[colMap.duration])existing.duration=parseInt(vals[colMap.duration])||existing.duration;
+if(colMap.status!==undefined&&vals[colMap.status])existing.status=vals[colMap.status].trim();
+if(colMap.critical!==undefined)existing.critical=(vals[colMap.critical]||'').trim().toLowerCase()==='yes';
+if(colMap.preds!==undefined)existing.preds=(vals[colMap.preds]||'').trim();
+if(colMap.notes!==undefined)existing.notes=(vals[colMap.notes]||'').trim();
+if(colMap.recovery!==undefined)existing.recovery=(vals[colMap.recovery]||'').trim();
+if(wsObj)existing.ws=wsObj.id;
+markDirty();dbSaveTask(existing);
+updated++;
+}else{
+// Add new task
+const newId=D.tasks.length?Math.max(...D.tasks.map(x=>x.id))+1:1;
+const ps=colMap.plannedStart!==undefined?parseCSVDate(vals[colMap.plannedStart]):'';
+const dur=colMap.duration!==undefined?(parseInt(vals[colMap.duration])||1):1;
+const pf=ps?iso(add(new Date(ps),dur-1)):'';
+const t={
+id:newId,ws:wsObj?wsObj.id:(WS[0]?.id||''),desc,
+plannedStart:ps,plannedFinish:pf,duration:dur,
+actualStart:'',actualFinish:'',
+status:colMap.status!==undefined?(vals[colMap.status]||'').trim()||'Not Started':'Not Started',
+role:'',person:colMap.person!==undefined?(vals[colMap.person]||'').trim():'',
+consulted:colMap.consulted!==undefined?(vals[colMap.consulted]||'').trim():'',
+preds:colMap.preds!==undefined?(vals[colMap.preds]||'').trim():'',
+notes:colMap.notes!==undefined?(vals[colMap.notes]||'').trim():'',
+critical:colMap.critical!==undefined?(vals[colMap.critical]||'').trim().toLowerCase()==='yes':false,
+recovery:''
+};
+D.tasks.push(t);
+markDirty();dbSaveTask(t);
+added++;
+}
+}
+toast('CSV imported: '+updated+' updated, '+added+' new');
+showPage('schedule');updBadges();
+e.target.value='';
+}
+
+function parseCSVLine(line){
+const result=[];let current='';let inQuotes=false;
+for(let i=0;i<line.length;i++){
+const c=line[i];
+if(c==='"'){if(inQuotes&&line[i+1]==='"'){current+='"';i++;}else inQuotes=!inQuotes;}
+else if(c===','&&!inQuotes){result.push(current);current='';}
+else current+=c;
+}
+result.push(current);
+return result.map(v=>v.replace(/^\s+|\s+$/g,'').replace(/^"|"$/g,''));
+}
+
+function parseCSVDate(val){
+if(!val)return'';
+const v=val.trim();
+// Handle DD/MM/YYYY
+if(v.match(/^\d{1,2}\/\d{1,2}\/\d{4}$/)){const p=v.split('/');return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}
+// Handle YYYY-MM-DD
+if(v.match(/^\d{4}-\d{2}-\d{2}$/))return v;
+return v;
+}
+
 function importJSON(){document.getElementById('fileImport').click();}
 async function doImport(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async ev=>{try{D=JSON.parse(ev.target.result);await saveAll();location.reload();}catch(e){alert('Invalid JSON');}};r.readAsText(f);}
 function toast(m){const t=document.createElement('div');t.style.cssText='position:fixed;bottom:16px;right:16px;background:#1B2A4A;color:#fff;padding:8px 18px;border-radius:5px;font-size:12px;z-index:999;opacity:0;transition:opacity .2s;';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(()=>t.style.opacity='1');setTimeout(()=>{t.style.opacity='0';setTimeout(()=>t.remove(),200);},1500);}
@@ -330,6 +477,7 @@ function today(){return iso(new Date());}
 // --- status html ---
 function stH(s){const m={Complete:'st-c','In Progress':'st-p','Not Started':'st-n',Blocked:'st-b','On Hold':'st-h',Overdue:'st-o'};return`<span class="st ${m[s]||'st-n'}">${s}</span>`;}
 function effSt(t){const td=today();if(t.status==='Complete')return'Complete';if(t.status==='Blocked')return'Blocked';if(t.status==='On Hold')return'On Hold';if(t.plannedFinish<td&&t.status!=='Complete')return'Overdue';return t.status;}
+function isDecisionOrGate(t){const d=t.desc.toLowerCase();return d.startsWith('decision')||d.startsWith('gate');}
 function wsC(id){return WS.find(w=>w.id===id)?.c||'#ccc';}
 function wsN(id){return WS.find(w=>w.id===id)?.n||id;}
 function getPerson(t){return t.person||'';}
@@ -342,7 +490,7 @@ function showPage(p){const m=document.getElementById('mainArea');
 switch(p){
 case'dash':renderDash(m);break;case'today':renderToday(m);break;case'week':renderWeek(m);break;case'monthly':renderMonthly(m);break;
 case'person':renderPerson(m);break;case'schedule':renderSchedule(m);break;case'critical':renderCritical(m);break;
-case'decisions':renderDecisions(m);break;case'team':renderTeam(m);break;case'unalloc':renderUnalloc(m);break;
+case'team':renderTeam(m);break;case'unalloc':renderUnalloc(m);break;
 case'overdue':renderOverdue(m);break;case'stock':renderStock(m);break;case'risks':renderRisks(m);break;
 case'budget':renderBudget(m);break;case'compliance':renderComp(m);break;case'changelog':renderCL(m);break;case'settings':renderSettings(m);break;
 }}
@@ -353,9 +501,8 @@ const td=today();
 const todayTasks=D.tasks.filter(t=>t.plannedStart<=td&&t.plannedFinish>=td&&t.status!=='Complete');
 document.getElementById('todayBg').textContent=todayTasks.length;
 const crit=D.tasks.filter(t=>t.critical&&t.status!=='Complete').length;
-document.getElementById('critBg').textContent=crit;
-const dec=D.decisions.filter(d=>d.status==='Open').length;
-document.getElementById('decBg').textContent=dec;
+const decGate=D.tasks.filter(t=>isDecisionOrGate(t)&&t.status!=='Complete').length;
+document.getElementById('critBg').textContent=crit+decGate;
 const una=D.tasks.filter(t=>!getPerson(t)&&t.status!=='Complete').length;
 document.getElementById('unaBg').textContent=una;
 const late=D.tasks.filter(t=>{const s=effSt(t);return s==='Overdue'||s==='Blocked';}).length;
@@ -373,7 +520,7 @@ const blk=ts.filter(t=>t.status==='Blocked').length;
 const od=ts.filter(t=>t.plannedFinish<td&&t.status!=='Complete').length;
 const pct=total?Math.round(comp/total*100):0;
 const dl=diffD(new Date(),DL);
-const openDec=D.decisions.filter(d=>d.status==='Open').length;
+const openDec=ts.filter(t=>isDecisionOrGate(t)&&t.status!=='Complete').length;
 const openRisk=D.risks.filter(r=>r.status==='Open'&&r.like*r.impact>=12).length;
 const una=ts.filter(t=>!getPerson(t)&&t.status!=='Complete').length;
 const todayTs=ts.filter(t=>t.plannedStart<=td&&t.plannedFinish>=td&&t.status!=='Complete');
@@ -384,7 +531,7 @@ let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px">Executive
 <div class="kpi ${dl>30?'g':dl>14?'a':'r'}"><div class="kl">Days to Exit</div><div class="kv">${dl}</div><div class="ks">Hard deadline 30/06/2026</div></div>
 <div class="kpi ${od===0?'g':'r'}" onclick="showPage('overdue')"><div class="kl">Overdue</div><div class="kv">${od}</div><div class="ks">Click to view all late tasks</div></div>
 <div class="kpi ${blk===0?'g':'r'}" onclick="showPage('overdue')"><div class="kl">Blocked</div><div class="kv">${blk}</div><div class="ks">${blk>0?'REQUIRES ACTION':''}</div></div>
-<div class="kpi ${openDec===0?'g':'r'}" onclick="showPage('decisions')"><div class="kl">Open Decisions</div><div class="kv">${openDec}</div><div class="ks">Click to resolve →</div></div>
+<div class="kpi ${openDec===0?'g':'r'}" onclick="showPage('critical')"><div class="kl">Decisions / Gates</div><div class="kv">${openDec}</div><div class="ks">Open — on Critical Path →</div></div>
 <div class="kpi ${una===0?'g':'a'}" onclick="showPage('unalloc')"><div class="kl">Unallocated Tasks</div><div class="kv">${una}</div><div class="ks">${una>0?'Need person assigned':'All allocated'}</div></div>
 <div class="kpi b" onclick="showPage('today')"><div class="kl">Today's Tasks</div><div class="kv">${todayTs.length}</div><div class="ks">Click for today's plan →</div></div>
 <div class="kpi ${openRisk===0?'g':'a'}" onclick="showPage('risks')"><div class="kl">High Risks (Open)</div><div class="kv">${openRisk}</div><div class="ks">${D.risks.filter(r=>r.status==='Open').length} total open</div></div>
@@ -726,7 +873,7 @@ showPage(document.querySelector('.ni.act')?.dataset.p||'dash');updBadges();
 function renderSchedule(el){
 let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
 <h2 style="font-size:16px;color:var(--navy);">Master Schedule — All Tasks</h2>
-<button class="btn btn-p" onclick="openNewTask()">+ Add Task</button></div>
+<div style="display:flex;gap:6px;"><button class="btn btn-o" onclick="exportCurrentCSV()">📥 Export CSV</button><button class="btn btn-o" onclick="importCSV()">📤 Import CSV</button><button class="btn btn-p" onclick="openNewTask()">+ Add Task</button></div></div>
 <div class="filter-bar">
 <select id="sFws" onchange="reSchedule()"><option value="">All Streams</option>${WS.map(w=>`<option value="${w.id}">${w.n}</option>`).join('')}</select>
 <select id="sFst" onchange="reSchedule()"><option value="">All Status</option><option>Not Started</option><option>In Progress</option><option>Complete</option><option>Blocked</option><option>On Hold</option><option>Overdue</option></select>
@@ -795,31 +942,91 @@ document.getElementById('schedDiv').innerHTML=h;
 // === CRITICAL PATH ===
 function renderCritical(el){
 const td=today();
-const crit=D.tasks.filter(t=>t.critical&&t.status!=='Complete');
-const od=crit.filter(t=>effSt(t)==='Overdue');
+const allCrit=D.tasks.filter(t=>(t.critical||isDecisionOrGate(t))&&t.status!=='Complete');
+const od=allCrit.filter(t=>effSt(t)==='Overdue');
+const decisions=allCrit.filter(t=>isDecisionOrGate(t));
+const critOnly=allCrit.filter(t=>t.critical&&!isDecisionOrGate(t));
 
-let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:12px;">⚡ Critical Path — Zero Float</h2>`;
+let h=`<h2 style="font-size:16px;color:var(--navy);margin-bottom:4px;">⚡ Critical Path — Decisions, Gates & Zero-Float Tasks</h2>
+<p style="font-size:11px;color:var(--muted);margin-bottom:12px;">Tasks flagged as Critical, or starting with "Decision" or "Gate" in the description. Sorted by start date.</p>
+<div class="filter-bar">
+<select id="critFilter" onchange="filterCritical()">
+<option value="all">All Critical + Decisions/Gates</option>
+<option value="decisions">Decisions & Gates Only</option>
+<option value="critical">Critical Path Only (no decisions)</option>
+<option value="overdue">Overdue Only</option>
+</select>
+</div>`;
+
 if(od.length){
-h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">🔥 ${od.length} CRITICAL TASKS ARE LATE — RECOVERY REQUIRED</h3></div><div class="cb" style="padding:0;">`;
+h+=`<div class="card" style="border-color:var(--red);"><div class="ch" style="background:var(--red);"><h3 style="color:#fff;">🔥 ${od.length} CRITICAL/DECISION TASKS ARE LATE — RECOVERY REQUIRED</h3></div><div class="cb" style="padding:0;">`;
 od.forEach(t=>{
-h+=taskRowHtml(t,false,true);
-h+=`<div style="padding:4px 12px 8px 54px;"><div class="recovery-box"><div class="rtitle">Recovery Plan</div>
-<textarea rows="2" placeholder="What is the plan to get this back on track? Who is accountable? What date will it be resolved?" style="width:100%;" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;markDirty();dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div></div>`;
+const daysLate=diffD(t.plannedFinish,td);
+const person=getPerson(t);
+h+=`<div style="padding:8px 12px;border-bottom:1px solid #fdd;border-left:4px solid var(--red);background:#FFF8F8;">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;">
+<div><strong style="color:var(--red);">#${t.id} ${isDecisionOrGate(t)?'🔴':'⚡'}</strong> <strong>${t.desc}</strong>
+<div style="font-size:11px;color:var(--muted);margin-top:2px;">${wsN(t.ws)} | ${fmt(t.plannedStart)} → ${fmt(t.plannedFinish)} | <strong style="color:var(--red);">${daysLate} days late</strong> | Responsible: <strong>${person||'NOBODY'}</strong>${t.consulted?' | Consulted: '+t.consulted:''}</div></div>
+<button class="btn btn-o" style="font-size:10px;flex-shrink:0;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></div>
+<div class="recovery-box" style="margin-top:6px;"><div class="rtitle">⚡ Recovery Plan</div>
+<textarea rows="2" placeholder="What will be done? By when? Who is accountable?" onchange="D.tasks[${D.tasks.indexOf(t)}].recovery=this.value;markDirty();dbSaveTask(D.tasks[${D.tasks.indexOf(t)}]);">${t.recovery||''}</textarea></div>
+</div>`;
 });
 h+=`</div></div>`;
 }
 
-h+=`<div class="card"><div class="ch"><h3>Critical Path Tasks (${crit.length} remaining)</h3></div><div class="cb" style="padding:0;">`;
-crit.sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart)).forEach(t=>{h+=taskRowHtml(t,true,true);});
-h+=`</div></div>`;
+// Decisions & Gates section
+if(decisions.length){
+h+=`<div class="card" style="border-color:var(--amber);" id="critDecisions"><div class="ch" style="background:var(--amber);"><h3 style="color:#fff;">🔴 Decisions & Gates (${decisions.length} open)</h3></div><div class="cb">
+<table class="dt"><thead><tr><th>#</th><th style="min-width:250px;">Decision / Gate</th><th>Stream</th><th>Responsible</th><th>Consulted</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th></th></tr></thead><tbody>`;
+decisions.sort((a,b)=>(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999')).forEach(t=>{
+const s=effSt(t);const person=getPerson(t);
+h+=`<tr style="${s==='Overdue'?'background:#FFF0F0;':''}">
+<td><strong>${t.id}</strong></td><td><strong>${t.desc}</strong>${t.notes?'<div style="font-size:10px;color:var(--muted);margin-top:2px;">'+t.notes+'</div>':''}</td>
+<td style="font-size:10px;">${wsN(t.ws)}</td>
+<td style="font-size:11px;">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</td>
+<td style="font-size:11px;color:var(--muted);">${t.consulted||'—'}</td>
+<td style="font-size:11px;">${fmtShort(t.plannedStart)}</td><td style="font-size:11px;">${fmtShort(t.plannedFinish)}</td>
+<td>${t.duration}d</td><td>${stH(s)}</td>
+<td><button class="btn btn-o" style="padding:2px 6px;font-size:10px;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></td></tr>`;
+});
+h+=`</tbody></table></div></div>`;
+}
+
+// Critical path tasks (non-decision)
+h+=`<div class="card" id="critTasks"><div class="ch"><h3>⚡ Critical Path Tasks (${critOnly.length} remaining)</h3></div><div class="cb">
+<table class="dt"><thead><tr><th>#</th><th style="min-width:250px;">Task</th><th>Stream</th><th>Responsible</th><th>Consulted</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th>Deps</th><th></th></tr></thead><tbody>`;
+critOnly.sort((a,b)=>(a.plannedStart||'9999').localeCompare(b.plannedStart||'9999')).forEach(t=>{
+const s=effSt(t);const person=getPerson(t);
+h+=`<tr style="${s==='Overdue'?'background:#FFF0F0;':''}">
+<td><strong>${t.id}</strong></td><td>${t.desc}${t.recovery?'<div class="recovery-box" style="margin-top:4px;"><div class="rtitle">Recovery:</div>'+t.recovery+'</div>':''}</td>
+<td style="font-size:10px;">${wsN(t.ws)}</td>
+<td style="font-size:11px;">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</td>
+<td style="font-size:11px;color:var(--muted);">${t.consulted||'—'}</td>
+<td style="font-size:11px;">${fmtShort(t.plannedStart)}</td><td style="font-size:11px;">${fmtShort(t.plannedFinish)}</td>
+<td>${t.duration}d</td><td>${stH(s)}</td>
+<td style="font-size:10px;">${t.preds||'—'}</td>
+<td><button class="btn btn-o" style="padding:2px 6px;font-size:10px;" onclick="editTask(${D.tasks.indexOf(t)})">Edit</button></td></tr>`;
+});
+h+=`</tbody></table></div></div>`;
 
 // Near-critical
-const nearCrit=D.tasks.filter(t=>!t.critical&&t.preds&&t.status!=='Complete').slice(0,20);
+const nearCrit=D.tasks.filter(t=>!t.critical&&!isDecisionOrGate(t)&&t.preds&&t.status!=='Complete').slice(0,20);
 h+=`<div class="card"><div class="ch"><h3>🟡 Near-Critical — Dependent Tasks</h3></div><div class="cb" style="padding:0;">`;
 nearCrit.forEach(t=>{h+=taskRowHtml(t,false,true);});
 h+=`</div></div>`;
 
 el.innerHTML=h;
+}
+
+function filterCritical(){
+const f=document.getElementById('critFilter')?.value||'all';
+const decSec=document.getElementById('critDecisions');
+const critSec=document.getElementById('critTasks');
+if(f==='all'){if(decSec)decSec.style.display='';if(critSec)critSec.style.display='';}
+else if(f==='decisions'){if(decSec)decSec.style.display='';if(critSec)critSec.style.display='none';}
+else if(f==='critical'){if(decSec)decSec.style.display='none';if(critSec)critSec.style.display='';}
+else if(f==='overdue'){renderCritical(document.getElementById('mainArea'));}
 }
 
 // === DECISIONS ===
