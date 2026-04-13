@@ -114,7 +114,7 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 </head>
 <body>
 <header class="hdr">
-<div class="logo"><span>abh</span></div><div class="sep">|</div><div class="ttl">St Marys → Erskine Park Relocation Command Centre</div>
+<div class="logo" onclick="goHome()" title="Back to Dashboard" style="cursor:pointer;"><span>abh</span></div><div class="sep">|</div><div class="ttl" onclick="goHome()" title="Back to Dashboard" style="cursor:pointer;">St Marys → Erskine Park Relocation Command Centre</div>
 <div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn" onclick="exportJSON()">📥 Backup</button><button class="hbtn" onclick="importJSON()">📤 Restore</button></div>
 </header>
 <!-- SAVE BAR — fixed below header -->
@@ -491,6 +491,13 @@ function getPerson(t){return t.person||'';}
 document.querySelectorAll('.ni').forEach(n=>n.addEventListener('click',()=>{
 document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));n.classList.add('act');showPage(n.dataset.p);
 }));
+// Home button: logo and title in the header route back to the dashboard.
+function goHome(){
+  document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));
+  const dashItem=document.querySelector('.ni[data-p="dash"]');
+  if(dashItem)dashItem.classList.add('act');
+  showPage('dash');
+}
 function showPage(p){const m=document.getElementById('mainArea');
 switch(p){
 case'dash':renderDash(m);break;case'today':renderToday(m);break;case'week':renderWeek(m);break;case'monthly':renderMonthly(m);break;
