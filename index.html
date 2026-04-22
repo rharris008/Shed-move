@@ -707,8 +707,9 @@ ${monthOpts.map(m=>{const [y,mn]=m.split('-');const d=new Date(y,mn-1,1);return`
 </div></div>
 <p style="font-size:11px;color:var(--muted);margin-bottom:8px;">Tasks shown on their start day. <span style="color:var(--red);font-weight:600;">Red = unallocated.</span> Click a task to edit.</p>`;
 
-// Calendar grid
-h+=`<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:#ddd;border:1px solid #ddd;border-radius:6px;overflow:hidden;">`;
+// Calendar grid — scrollable wrapper so narrow viewports get a scrollbar
+h+=`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">`;
+h+=`<div style="display:grid;grid-template-columns:repeat(7,minmax(120px,1fr));gap:1px;background:#ddd;border:1px solid #ddd;border-radius:6px;overflow:hidden;min-width:700px;">`;
 // Day headers
 ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d=>{
 h+=`<div style="background:var(--navy);color:#fff;padding:6px;text-align:center;font-size:11px;font-weight:700;">${d}</div>`;
@@ -749,7 +750,8 @@ const totalCells=startOffset+daysInMonth;
 const remainder=totalCells%7;
 if(remainder>0){for(let i=0;i<7-remainder;i++){h+=`<div style="background:#f9f9f9;min-height:100px;padding:4px;"></div>`;}}
 
-h+=`</div>`;
+h+=`</div>`; // close calendar grid
+h+=`</div>`; // close overflow-x wrapper
 
 // Legend
 h+=`<div style="display:flex;gap:16px;margin-top:10px;font-size:10px;color:var(--muted);align-items:center;flex-wrap:wrap;">
