@@ -936,7 +936,7 @@ tasks.sort((a,b)=>{const sa=statusOrder[effSt(a)]??3;const sb=statusOrder[effSt(
 let h=`<table class="dt"><thead><tr><th>Stream</th><th style="min-width:280px;">Task</th><th>Responsible</th><th>Consulted</th><th>Start</th><th>Finish</th><th>Dur</th><th>Status</th><th>Deps</th><th>Notes</th><th></th></tr></thead><tbody>`;
 tasks.forEach(t=>{
 const s=effSt(t);const person=getPerson(t);
-h+=`<tr style="border-left:3px solid ${wsC(t.ws)};${t.critical?'background:#FFF8F6;':''}${s==='Overdue'?'background:#FFF0F0;':''}">
+h+=`<tr id="task-${t.id}" style="border-left:3px solid ${wsC(t.ws)};${t.critical?'background:#FFF8F6;':''}${s==='Overdue'?'background:#FFF0F0;':''}">
 <td style="font-size:10px;">${wsN(t.ws)}</td>
 <td><span style="font-size:10px;color:var(--muted);margin-right:4px;">#${t.id}${t.critical?' ⚡':''}</span>${t.desc}${t.recovery?'<div class="recovery-box"><div class="rtitle">Recovery Plan:</div>'+t.recovery+'</div>':''}</td>
 <td style="font-size:11px;">${person||'<span class="alloc-warn">UNALLOCATED</span>'}</td>
@@ -1831,12 +1831,54 @@ WS.splice(dropIdx,0,item);
 saveWS();renderSettings(document.getElementById('mainArea'));
 }
 
+// === HASH DEEP LINK ===
+// Supports:
+//   #milestones          — navigate to Master Schedule, scroll to first KEY MILESTONE row
+//   #milestone-<id>      — navigate to Master Schedule, scroll to and highlight task row with that ID
+function handleHashNav(){
+  const hash=window.location.hash;
+  if(!hash)return;
+  const milestoneMatch=hash.match(/^#milestone-(\d+)$/);
+  if(milestoneMatch){
+    const targetId=parseInt(milestoneMatch[1],10);
+    // Switch to schedule view
+    document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));
+    const schedItem=document.querySelector('.ni[data-p="schedule"]');
+    if(schedItem)schedItem.classList.add('act');
+    showPage('schedule');
+    // After render, scroll to and highlight the row
+    requestAnimationFrame(()=>{
+      const row=document.getElementById('task-'+targetId);
+      if(row){
+        row.scrollIntoView({behavior:'smooth',block:'center'});
+        const prev=row.style.background;
+        row.style.transition='background 0.3s';
+        row.style.background='#FFF3CD';
+        setTimeout(()=>{row.style.background=prev;},2500);
+      }
+    });
+    return;
+  }
+  if(hash==='#milestones'){
+    document.querySelectorAll('.ni').forEach(x=>x.classList.remove('act'));
+    const schedItem=document.querySelector('.ni[data-p="schedule"]');
+    if(schedItem)schedItem.classList.add('act');
+    showPage('schedule');
+    return;
+  }
+}
+
 // === INIT ===
 (async function init(){
   document.getElementById('mainArea').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:60vh;"><div style="text-align:center;"><div style="font-size:24px;margin-bottom:8px;">⏳</div><div style="font-size:14px;color:var(--muted);">Loading from database...</div></div></div>';
   await loadAll();
   updBadges();
-  renderDash(document.getElementById('mainArea'));
+  // Check for deep link hash before defaulting to dashboard
+  if(window.location.hash){
+    handleHashNav();
+  }else{
+    renderDash(document.getElementById('mainArea'));
+  }
 })();
 // No auto-save interval — each edit writes to DB individually
 </script>
