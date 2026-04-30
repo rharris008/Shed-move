@@ -830,7 +830,7 @@ let cls='task-row';if(s==='Overdue')cls+=' overdue';if(s==='Blocked')cls+=' bloc
 let h=`<div class="${cls}" style="border-left:3px solid ${wsObj?.c||'#ccc'};">`;
 if(showCheck)h+=`<input type="checkbox" class="tcheck" ${t.status==='Complete'?'checked':''} onchange="toggleTask(${t.id},this.checked)">`;
 h+=`<div class="tid">${t.id}${t.critical?'<span style="color:var(--red);">⚡</span>':''}</div>`;
-h+=`<div class="tdesc"><div class="tname">${t.desc}</div><div class="tmeta">${wsObj?.n||t.ws}${showDates?' | '+fmtShort(t.plannedStart)+' → '+fmtShort(t.plannedFinish):''} | ${t.duration}d${t.preds?' | depends: '+t.preds:''}${t.notes?' | <em>'+t.notes+'</em>':''}</div></div>`;
+h+=`<div class="tdesc"><div class="tname">${t.desc}${(()=>{try{const n=JSON.parse(t.notes||'{}'||null);return n.is_milestone?'<span style="background:#1B2A4A;color:#fff;font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:700;letter-spacing:.3px;">KEY MILESTONE</span>':''}catch(e){return''}})()} </div><div class="tmeta">${wsObj?.n||t.ws}${showDates?' | '+fmtShort(t.plannedStart)+' → '+fmtShort(t.plannedFinish):''} | ${t.duration}d${t.preds?' | depends: '+t.preds:''}${t.notes?' | <em>'+t.notes+'</em>':''}</div></div>`;
 // Inline RESPONSIBLE person selector
 h+=`<div class="tperson" style="width:150px;"><div style="font-size:8px;text-transform:uppercase;color:var(--muted);letter-spacing:.5px;margin-bottom:1px;">Responsible</div><select onchange="inlineSetPerson(${idx},this.value)" style="font-size:10px;padding:2px 3px;border:1px solid ${person?'#ccc':'var(--amber)'};border-radius:3px;background:${person?'#fff':'#FEF3CD'};max-width:140px;width:100%;color:var(--text);">`;
 h+=`<option value="">— assign —</option>`;
