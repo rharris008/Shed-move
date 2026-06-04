@@ -325,9 +325,11 @@ const fst=document.getElementById('sFst')?.value||'';
 const fper=document.getElementById('sFper')?.value||'';
 const fq=(document.getElementById('sFq')?.value||'').toLowerCase();
 const fcrit=document.getElementById('sFcrit')?.checked||false;
+const fhideComp=document.getElementById('sFhideComp')?.checked!==false;
 const sortBy=document.getElementById('sFsort')?.value||'date';
 
 let tasks=D.tasks.slice();
+if(fhideComp)tasks=tasks.filter(t=>t.status!=='Complete');
 if(fws)tasks=tasks.filter(t=>t.ws===fws);
 if(fst==='Overdue')tasks=tasks.filter(t=>effSt(t)==='Overdue');
 else if(fst)tasks=tasks.filter(t=>t.status===fst);
@@ -893,6 +895,7 @@ let h=`<div style="display:flex;justify-content:space-between;align-items:center
 <select id="sFst" onchange="reSchedule()"><option value="">All Status</option><option>Not Started</option><option>In Progress</option><option>Complete</option><option>Blocked</option><option>On Hold</option><option>Overdue</option></select>
 <select id="sFper" onchange="reSchedule()"><option value="">All People</option>${[...new Set(D.contacts.filter(c=>c.name).map(c=>c.name))].map(n=>`<option>${n}</option>`).join('')}</select>
 <input type="text" placeholder="Search..." id="sFq" oninput="reSchedule()" style="width:180px;">
+<label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sFhideComp" checked onchange="reSchedule()"> Hide Completed</label>
 <label style="font-size:11px;display:flex;align-items:center;gap:4px;"><input type="checkbox" id="sFcrit" onchange="reSchedule()"> Critical only</label>
 <select id="sFsort" onchange="reSchedule()" style="font-weight:600;">
 <option value="date">Sort: Start Date</option>
@@ -910,10 +913,12 @@ const fst=document.getElementById('sFst')?.value||'';
 const fper=document.getElementById('sFper')?.value||'';
 const fq=(document.getElementById('sFq')?.value||'').toLowerCase();
 const fcrit=document.getElementById('sFcrit')?.checked||false;
+const fhideComp=document.getElementById('sFhideComp')?.checked!==false;
 const sortBy=document.getElementById('sFsort')?.value||'date';
 const td=today();
 
 let tasks=D.tasks.slice();
+if(fhideComp)tasks=tasks.filter(t=>t.status!=='Complete');
 if(fws)tasks=tasks.filter(t=>t.ws===fws);
 if(fst==='Overdue')tasks=tasks.filter(t=>effSt(t)==='Overdue');
 else if(fst)tasks=tasks.filter(t=>t.status===fst);
