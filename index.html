@@ -10,10 +10,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ABH — Relocation Command Centre</title>
 <style>
+/* ════ CSS VARIABLES ════ */
 :root{--navy:#1B2A4A;--red:#C0392B;--amber:#E67E22;--green:#27AE60;--blue:#0E7CCE;--bg:#F0F2F5;--card:#fff;--text:#1a1a2e;--muted:#5a6577;--border:#D5DAE3;--alt:#F7F9FC;--sidebar:56px;--header:52px}
+/* ════ RESET + BASE STYLES ════ */
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
 button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inherit;font-size:13px}
+/* ════ HEADER ════ */
 .hdr{position:fixed;top:0;left:0;right:0;height:var(--header);background:var(--navy);display:flex;align-items:center;padding:0 16px;z-index:100;gap:12px}
 .hdr .logo{font-size:18px;font-weight:800;color:#fff;letter-spacing:1px}.hdr .logo span{color:var(--blue)}
 .hdr .sep{color:rgba(255,255,255,.3);font-size:14px}.hdr .ttl{color:rgba(255,255,255,.7);font-size:12px}
@@ -22,6 +25,7 @@ button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inhe
 .hdr .hbtn{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;padding:4px 12px;border-radius:3px;font-size:11px}
 .hdr .hbtn.green{background:var(--green);border-color:var(--green)}
 
+/* ════ SIDEBAR NAV ════ */
 .side{position:fixed;top:calc(var(--header) + 36px);left:0;bottom:0;width:220px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;z-index:90;padding:8px 0}
 .side .sec{padding:10px 14px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);font-weight:700}
 .side .ni{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:12px;color:var(--muted);border-left:3px solid transparent;transition:all .1s}
@@ -29,32 +33,39 @@ button{cursor:pointer;font-family:inherit}input,select,textarea{font-family:inhe
 .side .ni .ic{width:16px;text-align:center;font-size:13px}
 .side .ni .bg{margin-left:auto;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-weight:700;min-width:16px;text-align:center}
 
+/* ════ MAIN LAYOUT ════ */
 .main{margin-left:220px;margin-top:calc(var(--header) + 36px);padding:16px;min-height:calc(100vh - var(--header) - 36px)}
 .page{display:none}.page.act{display:block}
 
+/* ════ CARDS / PANELS ════ */
 .card{background:#fff;border-radius:6px;border:1px solid var(--border);margin-bottom:12px}
 .card .ch{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .card .ch h3{font-size:13px;font-weight:700}.card .cb{padding:12px 14px}
 
+/* ════ KPI TILES ════ */
 .kpi-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:12px}
 .kpi{background:#fff;border-radius:6px;padding:12px 14px;border-left:4px solid var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.05);cursor:pointer;transition:transform .1s}
 .kpi:hover{transform:translateY(-1px)}.kpi.r{border-left-color:var(--red)}.kpi.g{border-left-color:var(--green)}.kpi.a{border-left-color:var(--amber)}.kpi.b{border-left-color:var(--blue)}
 .kpi .kl{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
 .kpi .kv{font-size:24px;font-weight:800;color:var(--navy)}.kpi .ks{font-size:10px;color:var(--muted);margin-top:2px}
 
+/* ════ TABLES ════ */
 table.dt{width:100%;border-collapse:collapse;font-size:12px}
 table.dt th{background:var(--navy);color:#fff;padding:6px 8px;text-align:left;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.4px;position:sticky;top:0;z-index:2;white-space:nowrap}
 table.dt td{padding:5px 8px;border-bottom:1px solid #EEF0F4;vertical-align:top}
 table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{background:#E8F0FE}
 
+/* ════ STATUS BADGES ════ */
 .st{display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:600;white-space:nowrap}
 .st-c{background:#D5F5E3;color:#1E8449}.st-p{background:#D6EAF8;color:#1A5276}.st-n{background:#EAECEE;color:#5D6D7E}
 .st-b{background:#FADBD8;color:#922B21}.st-h{background:#FEF9E7;color:#9A7D0A}.st-o{background:#F5B7B1;color:#922B21}
 
+/* ════ BUTTONS ════ */
 .btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:3px;font-size:11px;font-weight:600;border:none}
 .btn-p{background:var(--blue);color:#fff}.btn-r{background:var(--red);color:#fff}.btn-g{background:var(--green);color:#fff}
 .btn-o{background:transparent;border:1px solid var(--border);color:var(--text)}.btn:hover{opacity:.85}
 
+/* ════ MODALS ════ */
 .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;justify-content:center;align-items:flex-start;padding-top:40px}
 .modal-ov.open{display:flex}
 .modal{background:#fff;border-radius:8px;width:700px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
@@ -62,11 +73,13 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 .modal .mh h3{font-size:15px}.modal .mx{background:none;border:none;font-size:18px;color:var(--muted)}
 .modal .mb{padding:16px 18px}.modal .mf{padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
 
+/* ════ FORM GROUPS ════ */
 .fr{display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap}
 .fg{display:flex;flex-direction:column;gap:3px}.fg label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 .fg input,.fg select,.fg textarea{border:1px solid var(--border);border-radius:3px;padding:5px 8px}
 .fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(14,124,206,.12)}
 
+/* ════ DAY CARDS (schedule / calendar views) ════ */
 .day-card{border:1px solid var(--border);border-radius:6px;margin-bottom:8px;overflow:hidden}
 .day-card .dh{padding:8px 12px;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px}
 .day-card .dh.today{background:var(--blue);color:#fff}
@@ -75,6 +88,7 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 .day-card .dh.weekend{background:#FFF8E1;color:var(--amber)}
 .day-card .db{padding:0}
 
+/* ════ TASK ROWS ════ */
 .task-row{display:flex;align-items:center;gap:8px;padding:6px 12px;border-bottom:1px solid #f0f0f0;font-size:12px}
 .task-row:last-child{border-bottom:none}
 .task-row:hover{background:#F5F8FF}
@@ -88,24 +102,29 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 .task-row.blocked{background:#FFF0F0;border-left:3px solid #922B21}
 .task-row.complete{opacity:.6}
 
+/* ════ PERSON CARDS ════ */
 .person-card{border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;background:#fff}
 .person-card .pname{font-size:15px;font-weight:700;color:var(--navy)}
 .person-card .prole{font-size:11px;color:var(--muted)}
 .person-card .pcontact{font-size:11px;color:var(--text);margin-top:4px}
 
+/* ════ FILTER BAR ════ */
 .filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
 .filter-bar select,.filter-bar input{padding:4px 8px;border:1px solid var(--border);border-radius:3px;font-size:12px}
 
+/* ════ RECOVERY BOX / WARNING PANELS ════ */
 .recovery-box{background:#FFF3F0;border:1px solid var(--red);border-radius:6px;padding:10px 14px;margin-top:6px}
 .recovery-box .rtitle{font-weight:700;color:var(--red);font-size:12px;margin-bottom:4px}
 .recovery-box textarea{width:100%;border:1px solid #ddd;border-radius:3px;padding:6px;font-size:12px;margin-top:4px}
 
 .alloc-warn{background:#FEF3CD;border:1px solid var(--amber);border-radius:4px;padding:3px 8px;font-size:10px;color:#856404;font-weight:600}
 
+/* ════ INNER TABS ════ */
 .tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:12px}
 .tab{padding:6px 16px;font-size:12px;font-weight:600;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px}
 .tab.act{color:var(--blue);border-bottom-color:var(--blue)}
 
+/* ════ RESPONSIVE / PRINT / UTILITIES ════ */
 @media(max-width:900px){.side{display:none}.main{margin-left:0}}
 @media print{.side,.hdr{display:none!important}.main{margin:0!important;padding:8px!important}}
 @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
@@ -113,16 +132,19 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 </style>
 </head>
 <body>
+<!-- ══════════════ SECTION: App Header Bar ══════════════ -->
 <header class="hdr">
 <div class="logo" onclick="goHome()" title="Back to Dashboard" style="cursor:pointer;display:flex;align-items:center;"><img src="abh-logo.png" alt="ABH" style="height:32px;width:auto;"></div><div class="sep">|</div><div class="ttl" onclick="goHome()" title="Back to Dashboard" style="cursor:pointer;">St Marys → Erskine Park Relocation Command Centre</div>
 <div class="rt"><div class="dead" id="hdrDead"></div><button class="hbtn" onclick="exportJSON()">📥 Backup</button><button class="hbtn" onclick="importJSON()">📤 Restore</button></div>
 </header>
+<!-- ══════════════ SECTION: Save Bar (fixed, below header) ══════════════ -->
 <!-- SAVE BAR — fixed below header -->
 <div id="saveBar" style="position:fixed;top:var(--header);left:0;right:0;height:36px;background:#E8F5E9;border-bottom:1px solid #C8E6C9;display:flex;align-items:center;justify-content:center;gap:12px;z-index:99;transition:background .3s;">
 <span id="saveMsg" style="font-size:12px;color:#2E7D32;font-weight:600;">All changes saved</span>
 <button id="saveBtn" onclick="saveAll()" style="background:#27AE60;color:#fff;border:none;padding:5px 20px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;">💾 Saved</button>
 </div>
 </header>
+<!-- ══════════════ SECTION: Sidebar Navigation ══════════════ -->
 <nav class="side">
 <div class="sec">Command</div>
 <div class="ni act" data-p="dash"><span class="ic">📊</span>Dashboard</div>
@@ -146,8 +168,10 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 <div class="sec">Config</div>
 <div class="ni" data-p="settings"><span class="ic">⚙️</span>Work Streams</div>
 </nav>
+<!-- ══════════════ SECTION: Main Content Area (rendered by JS showPage()) ══════════════ -->
 <div class="main" id="mainArea"></div>
 
+<!-- ══════════════ SECTION: Modals (Task / Contact / Decision) ══════════════ -->
 <!-- TASK MODAL -->
 <div class="modal-ov" id="taskMod">
 <div class="modal">
@@ -172,6 +196,7 @@ table.dt tr:nth-child(even) td{background:var(--alt)}table.dt tr:hover td{backgr
 <div class="mf"><button class="btn btn-o" onclick="closeMod('decMod')">Cancel</button><button class="btn btn-p" onclick="saveDec()">Save</button></div>
 </div></div>
 
+<!-- ══════════════ SECTION: Hidden File Inputs ══════════════ -->
 <input type="file" id="fileImport" accept=".json" style="display:none" onchange="doImport(event)">
 <input type="file" id="csvImport" accept=".csv,.xlsx,.xls" style="display:none" onchange="doCSVImport(event)">
 
